@@ -11,10 +11,12 @@ const flightSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      match: /^[A-Z]{2}\d{3}$/,
     },
     destination: {
       type: String,
       required: true,
+      match: /^[A-Z]{3}$/,
     },
     departureDate: {
       type: Date,

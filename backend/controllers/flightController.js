@@ -46,14 +46,14 @@ const updateFlight = async (req, res) => {
       return res.status(404).json({ message: "Flight not found" });
     }
     if (flight.user.toString() !== req.user.id) {
-      return res.status(404).json({ mmessage: "User not authorized" });
+      return res.status(404).json({ message: "User not authorized" });
     }
     const updatedFlight = await Flight.findByIdAndUpdate(
       req.params.id,
       req.body, // get data from front-end
       { new: true }, //tell Mongo to return updated document
     );
-    res.status(200).json({ updatedFlight });
+    res.status(200).json(updatedFlight);
   } catch (error) {
     res
       .status(500)

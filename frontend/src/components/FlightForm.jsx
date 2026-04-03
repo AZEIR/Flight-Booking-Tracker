@@ -41,6 +41,17 @@ const FlightForm = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const flightNumberRegex = /^[A-Z]{2}\d{3}$/;
+    const flightDestinationRegex = /^[A-Z]{3}$/;
+    if (!flightNumberRegex.test(formData.flightNumber)) {
+      alert("Flight number must be 2 uppercase letters and 3 numbers!");
+      return;
+    } else if (!flightDestinationRegex.test(formData.destination)) {
+      alert("Flight Number must be 3 uppercase letters");
+      return;
+    }
+
     try {
       if (editingFlight) {
         const response = await axiosInstance.put(
@@ -50,9 +61,14 @@ const FlightForm = ({
             headers: { Authorization: `Bearer ${user.token}` },
           },
         );
+
+        const updatedRecord = response.data.updatedFlight
+          ? response.data.updatedFlight
+          : response.data;
+
         setFlights(
           flights.map((flight) =>
-            flight._id === response.data._id ? response.data : flight,
+            flight._id === updatedRecord._id ? updatedRecord : flight,
           ),
         );
       } else {
@@ -88,7 +104,10 @@ const FlightForm = ({
           placeholder="Flight Number (e.g., QF123)"
           value={formData.flightNumber}
           onChange={(e) =>
-            setFormData({ ...formData, flightNumber: e.target.value })
+            setFormData({
+              ...formData,
+              flightNumber: e.target.value.toUpperCase(),
+            })
           }
           className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           required
@@ -99,7 +118,10 @@ const FlightForm = ({
           placeholder="Destination"
           value={formData.destination}
           onChange={(e) =>
-            setFormData({ ...formData, destination: e.target.value })
+            setFormData({
+              ...formData,
+              destination: e.target.value.toUpperCase(),
+            })
           }
           className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           required

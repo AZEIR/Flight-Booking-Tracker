@@ -14,6 +14,20 @@ const FlightList = ({ flights, setFlights, setEditingFlight }) => {
       alert("Failed to delete flight.");
     }
   };
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Scheduled":
+        return "bg-emerald-100 text-emerald-800"; // Green
+      case "Delayed":
+        return "bg-amber-100 text-amber-800"; // Yellow/Orange
+      case "Departed":
+        return "bg-indigo-100 text-indigo-800"; // Purple/Blue
+      case "Cancelled":
+        return "bg-rose-100 text-rose-800"; // Red
+      default:
+        return "bg-slate-100 text-slate-800"; // Grey (Fallback)
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -31,10 +45,15 @@ const FlightList = ({ flights, setFlights, setEditingFlight }) => {
                 {flight.flightNumber}
               </span>
             </div>
-            <p className="text-slate-500 font-medium">
-              {new Date(flight.departureDate).toLocaleDateString()} •{" "}
-              {flight.status}
-            </p>
+
+            <div className="flex items-center gap-3 text-slate-500 font-medium">
+              <span>{new Date(flight.departureDate).toLocaleDateString()}</span>
+              <span
+                className={`text-xs font-bold px-3 py-1 rounded-full ${getStatusColor(flight.status)}`}
+              >
+                {flight.status}
+              </span>
+            </div>
           </div>
 
           <div className="flex gap-2 w-full md:w-auto">
