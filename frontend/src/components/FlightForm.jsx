@@ -10,7 +10,7 @@ const FlightForm = ({
 }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    flightNumer: "",
+    flightNumber: "",
     destination: "",
     departureDate: "",
     status: "Scheduled",
@@ -18,15 +18,20 @@ const FlightForm = ({
 
   useEffect(() => {
     if (editingFlight) {
+      let formattedDate = "";
+      if (editingFlight.departureDate) {
+        formattedDate = editingFlight.departureDate.substring(0, 10);
+      }
+
       setFormData({
-        flightNumer: editingFlight.flightNumber,
+        flightNumber: editingFlight.flightNumber,
         destination: editingFlight.destination,
-        departureDate: editingFlight.departureDate,
+        departureDate: formattedDate,
         status: editingFlight.status,
       });
     } else {
       setFormData({
-        flightNumer: "",
+        flightNumber: "",
         destination: "",
         departureDate: "",
         status: "Scheduled",
@@ -58,7 +63,7 @@ const FlightForm = ({
       }
       setEditingFlight(null);
       setFormData({
-        flightNumer: "",
+        flightNumber: "",
         destination: "",
         departureDate: "",
         status: "Scheduled",
