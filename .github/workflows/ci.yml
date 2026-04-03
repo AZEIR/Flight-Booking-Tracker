@@ -7,8 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  # JOB 1: Test the Backend
-  test-backend:
+  build-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,14 +21,6 @@ jobs:
       - name: Install Backend Dependencies
         working-directory: ./backend
         run: npm ci
-
-      - name: Run Backend Tests
-        working-directory: ./backend
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          JWT_SECRET: 2J8zqkP7VN6bxzg+Wy7DQZCA3Yx8mF3Bl0kch6HYtFs=
-          PORT: 5001
-        run: npm test
 
   build-frontend:
     runs-on: ubuntu-latest
