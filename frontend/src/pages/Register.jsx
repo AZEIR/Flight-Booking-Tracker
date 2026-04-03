@@ -1,26 +1,32 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../axiosConfig';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../axiosConfig";
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post('/api/auth/register', formData);
-      alert('Registration successful. Please log in.');
-      navigate('/login');
+      await axiosInstance.post("/api/auth/register", formData);
+      alert("Registration successful. Please log in.");
+      navigate("/login");
     } catch (error) {
-      alert('Registration failed. Please try again.');
+      alert("Registration failed. Please try again.");
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-20">
       <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          Create An Account
+        </h1>
         <input
           type="text"
           placeholder="Name"
@@ -39,10 +45,15 @@ const Register = () => {
           type="password"
           placeholder="Password"
           value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
           className="w-full mb-4 p-2 border rounded"
         />
-        <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white p-2 rounded"
+        >
           Register
         </button>
       </form>
