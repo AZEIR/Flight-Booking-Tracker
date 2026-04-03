@@ -10,7 +10,7 @@ const FlightForm = ({
 }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    flightNumer: "",
+    flightNumber: "",
     destination: "",
     departureDate: "",
     status: "Scheduled",
@@ -18,15 +18,20 @@ const FlightForm = ({
 
   useEffect(() => {
     if (editingFlight) {
+      let formattedDate = "";
+      if (editingFlight.departureDate) {
+        formattedDate = editingFlight.departureDate.substring(0, 10);
+      }
+
       setFormData({
-        flightNumer: editingFlight.flightNumber,
+        flightNumber: editingFlight.flightNumber,
         destination: editingFlight.destination,
-        departureDate: editingFlight.departureDate,
+        departureDate: formattedDate,
         status: editingFlight.status,
       });
     } else {
       setFormData({
-        flightNumer: "",
+        flightNumber: "",
         destination: "",
         departureDate: "",
         status: "Scheduled",
@@ -58,7 +63,7 @@ const FlightForm = ({
       }
       setEditingFlight(null);
       setFormData({
-        flightNumer: "",
+        flightNumber: "",
         destination: "",
         departureDate: "",
         status: "Scheduled",
@@ -71,13 +76,13 @@ const FlightForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 shadow-md rounded-lg mb-6 border border-gray-200"
+      className="bg-white p-8 shadow-xl rounded-3xl mb-8"
     >
-      <h2 className="text-xl font-bold mb-4 text-gray-800">
-        {editingFlight ? "Update Flight Details" : "Schedule a New Flight"}
+      <h2 className="text-2xl font-bold mb-6 text-slate-800 text-center">
+        {editingFlight ? "Update Flight" : "Book a New Flight"}
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         <input
           type="text"
           placeholder="Flight Number (e.g., QF123)"
@@ -85,7 +90,7 @@ const FlightForm = ({
           onChange={(e) =>
             setFormData({ ...formData, flightNumber: e.target.value })
           }
-          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           required
         />
 
@@ -96,7 +101,7 @@ const FlightForm = ({
           onChange={(e) =>
             setFormData({ ...formData, destination: e.target.value })
           }
-          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           required
         />
 
@@ -106,14 +111,14 @@ const FlightForm = ({
           onChange={(e) =>
             setFormData({ ...formData, departureDate: e.target.value })
           }
-          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           required
         />
 
         <select
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         >
           <option value="Scheduled">Scheduled</option>
           <option value="Delayed">Delayed</option>
@@ -122,20 +127,19 @@ const FlightForm = ({
         </select>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded transition duration-200"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all"
         >
-          {editingFlight ? "Update Flight" : "Save Flight"}
+          {editingFlight ? "Update Flight" : "Confirm Booking"}
         </button>
 
-        {/* If editing, show a cancel button to back out */}
         {editingFlight && (
           <button
             type="button"
             onClick={() => setEditingFlight(null)}
-            className="w-1/3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold p-3 rounded transition duration-200"
+            className="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-4 rounded-2xl transition-all"
           >
             Cancel
           </button>

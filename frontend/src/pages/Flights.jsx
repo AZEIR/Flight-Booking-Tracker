@@ -26,18 +26,26 @@ const Flights = () => {
   }, [user]);
 
   return (
-    <div className="container mx-auto p-6">
-      <FlightForm
-        flights={flights}
-        setFlights={setFlights}
-        editingFlight={editingFlight}
-        setEditingFlight={setEditingFlight}
-      />
-      <FlightList
-        flights={flights}
-        setFlights={setFlights}
-        setEditingFlight={setEditingFlight}
-      />
+    <div className="min-h-screen bg-slate-900 py-10 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* ADDED: White text for the dark background */}
+        <h1 className="text-3xl font-bold mb-8 text-white text-center">
+          My Flight Bookings
+        </h1>
+
+        <FlightForm
+          flights={flights}
+          setFlights={setFlights}
+          editingFlight={editingFlight}
+          setEditingFlight={setEditingFlight}
+        />
+
+        <FlightList
+          flights={flights}
+          setFlights={setFlights}
+          setEditingFlight={setEditingFlight}
+        />
+      </div>
     </div>
   );
 };
