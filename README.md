@@ -1,24 +1,39 @@
+#  Flight Booking Tracker
 
-**Assessment 1.2 (Total Marks **20**)**
+A full-stack MERN application designed to help users efficiently manage and track their flight bookings.
 
-Assignment: **Software requirements analysis and design (**Full-Stack CRUD Application Development with DevOps Practices**)**
+##  Live Application
+* **Public URL:** http://ec2-15-135-202-54.ap-southeast-2.compute.amazonaws.com
+* **Test Email:** admin@admin.com
+* **Test Password:** admin
 
+##  Features
+* **Flight Management (CRUD):** Users can add, view, edit, and cancel their flight bookings in real-time.
+* **Data Validation:** Enforces a specific flight number format (e.g., QF123) on both the React frontend and MongoDB backend.
+* **Automated CI/CD:** Fully functional deployment pipeline using GitHub Actions to push code directly to an AWS server.
 
----
+##  Tech Stack
+* **Frontend:** React.js
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB
+* **Deployment:** AWS EC2, PM2, Nginx, GitHub Actions (Self-Hosted Runner)
 
-**Objective**
-
-For this assessment, you have already been assigned a project. Your task is to develop a system that implements CRUD (Create, Read, Update, Delete) operations based on the selected project. The system should include both a user panel and an admin panel. Depending on the nature of your chosen project, you may decide how many CRUD operations are required to support the functionality of the system. You have been provided with a starter project that includes user authentication using Node.js, React.js, and MongoDB, your should extend this application based on your assigned project requirements. Ensure that the implemented features are appropriate and meaningful for your selected project. Your project should include the following:
-In this assignment you will complete the following tasks:
-
-* **Basic Version Control using GitHub**
-* **Development, CI/CD Integration for Automated Deployment**
-* **Project report**
-
- 
----
-
-**GitHub link of the starter project: **[https://github.com/nahaQUT/sampleapp_IFQ636.git](https://github.com/nahaQUT/sampleapp_IFQ636.git)
-
----
-
+##  Project Setup Instructions (Running Locally)
+Create a `.env` file inside the `backend` directory and add the following variables:
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
+PORT=5001
+```
+ On root folder
+```
+npm run install-all
+```
+To run
+```
+npm run
+```
+Or
+```
+npm run dev
+```
