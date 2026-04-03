@@ -1,44 +1,38 @@
-name: MERN CI Pipeline
+name: MERN Auto-Deployment
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
-  build-backend:
+  deploy:
+    name: Build and Deploy
     runs-on: self-hosted
+
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
 
-      - name: Install Backend Dependencies
-        working-directory: ./backend
-        run: npm ci
-
-  build-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-
-      - name: Install Frontend Dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Build React App
+      - name: Install and Build Frontend
         working-directory: ./frontend
         run: |
           npm install
           npm run build
+
+      - name: Install Backend & Setup Environment
+        working-directory: ./backend
+        run: |
+          npm install
+          touch .env
+          echo "${{ secrets.PROD }}" > .env
+
+      - name: Deploy to Live Server
+        run: |
+          pm2 restart all
+          pm2 save
