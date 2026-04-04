@@ -3,7 +3,7 @@
 A full-stack MERN application designed to help users efficiently manage and track their flight bookings.
 
 ##  Live Application
-* **Public URL:** http://ec2-15-135-202-54.ap-southeast-2.compute.amazonaws.com
+* **Public URL:** [LINK](http://ec2-3-25-67-24.ap-southeast-2.compute.amazonaws.com).
 * **Test Email:** admin@admin.com
 * **Test Password:** admin
 
