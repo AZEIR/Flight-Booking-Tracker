@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  // baseURL: "http://localhost:5001", // local
-  baseURL: "http://ec2-15-135-202-54.ap-southeast-2.compute.amazonaws.com:5001", // live
+  baseURL: import.meta.env.VITE_DOMAIN_NAME || "http://localhost:5001",
   headers: { "Content-Type": "application/json" },
 });
 

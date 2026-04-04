@@ -24,13 +24,14 @@ jobs:
         run: |
           npm install
           npm run build
+        env: VITE_DOMAIN_NAME: {{ secrets.DOMAIN_NAME }}
 
       - name: Install Backend & Setup Environment
         working-directory: ./backend
         run: |
           npm install
           touch .env
-          echo "MONGO_URI" = ${{ secrets.MONGO_URI }} >> .env
+          echo "MONGO_URI" = ${{ secrets.MONGO_URI }} > .env
           echo "JWT_SECRET" = ${{ secrets.JWT_SECRET }} >> .env
           echo "PORT" = ${{ secrets.PORT }} >> .env
 
