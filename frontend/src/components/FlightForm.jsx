@@ -102,6 +102,7 @@ const FlightForm = ({
         <input
           type="text"
           placeholder="Flight Number (e.g., QF123)"
+          maxLength="5"
           value={formData.flightNumber}
           onChange={(e) =>
             setFormData({
@@ -116,6 +117,7 @@ const FlightForm = ({
         <input
           type="text"
           placeholder="Destination"
+          maxLength="3"
           value={formData.destination}
           onChange={(e) =>
             setFormData({
