@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+    workflow_dispatch:
 
 jobs:
   deploy:
@@ -25,7 +26,7 @@ jobs:
           npm install
           npm run build
         env:
-          VITE_DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          VITE_DOMAIN_NAME: http://${{ secrets.DOMAIN_NAME }}:5001
 
       - name: Install Backend & Setup Environment
         working-directory: ./backend
