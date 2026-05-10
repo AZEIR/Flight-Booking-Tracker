@@ -15,6 +15,8 @@ const registerUser = async (req, res) => {
 
     const user = await User.create({ name, email, password });
 
+    const token = generateToken(user.id);
+
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // require HTTPS in production

@@ -36,6 +36,8 @@ jobs:
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" > .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "FRONTEND_URL=http://${{ secrets.DOMAIN_NAME }}:3000" >> .env
+          echo "NODE_ENV=development" >> .env
 
       - name: Deploy to Live Server
         run: |
