@@ -6,14 +6,14 @@ const FlightList = ({ flights, setFlights, setEditingFlight }) => {
 
   const handleDelete = async (flightId) => {
     try {
-      await axiosInstance.delete(`/api/flights/${flightId}`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
+      await axiosInstance.delete(`/api/flights/${flightId}`);
       setFlights(flights.filter((flight) => flight._id !== flightId));
     } catch (error) {
+      console.error("Delete error:", error);
       alert("Failed to delete flight.");
     }
   };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Scheduled":
