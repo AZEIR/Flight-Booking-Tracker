@@ -2,8 +2,6 @@ import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../axiosConfig";
 
 const FlightList = ({ flights, setFlights, setEditingFlight }) => {
-  const { user } = useAuth();
-
   const handleDelete = async (flightId) => {
     try {
       await axiosInstance.delete(`/api/flights/${flightId}`);
