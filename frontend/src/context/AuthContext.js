@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
     checkLoggedInUser();
-  });
+  }, []);
 
   const login = (userData) => {
     setUser(userData);

@@ -14,11 +14,18 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
 
     const user = await User.create({ name, email, password });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // require HTTPS in production
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in ms
+    });
+
     res.status(201).json({
       id: user.id,
       name: user.name,
       email: user.email,
-      token: generateToken(user.id),
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
