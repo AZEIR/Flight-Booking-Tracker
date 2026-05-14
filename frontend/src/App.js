@@ -23,7 +23,7 @@ function App() {
         />
 
         <Route
-          path="/flights"
+          path="/booking"
           element={user ? <BookingRecords /> : <Navigate to="/login" />}
         />
 
