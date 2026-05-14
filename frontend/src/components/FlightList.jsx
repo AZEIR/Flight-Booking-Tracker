@@ -1,9 +1,9 @@
 import axiosInstance from "../axiosConfig";
 
-const FlightList = ({ flights, setFlights, setEditingFlight }) => {
+const BookingRecordList = ({ flights, setFlights, setEditingFlight }) => {
   const handleDelete = async (flightId) => {
     try {
-      await axiosInstance.delete(`/api/flights/${flightId}`);
+      await axiosInstance.delete(`/api/records/${flightId}`);
       setFlights(flights.filter((flight) => flight._id !== flightId));
     } catch (error) {
       console.error("Delete error:", error);
@@ -73,4 +73,4 @@ const FlightList = ({ flights, setFlights, setEditingFlight }) => {
   );
 };
 
-export default FlightList;
+export default BookingRecordList;

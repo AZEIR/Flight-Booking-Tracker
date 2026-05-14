@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const flightSchema = new mongoose.Schema(
+const bookingSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,4 +33,4 @@ const flightSchema = new mongoose.Schema(
   },
 );
 
-module.exports = mongoose.model("Flight", flightSchema);
+module.exports = mongoose.model("BookingRecords", bookingSchema);

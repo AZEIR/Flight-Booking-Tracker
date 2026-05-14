@@ -12,7 +12,7 @@ const Flights = () => {
   useEffect(() => {
     const fetchFlights = async () => {
       try {
-        const response = await axiosInstance.get("/api/flights");
+        const response = await axiosInstance.get("/api/records");
         setFlights(response.data);
       } catch (error) {
         alert("Failed to fetch flights.");

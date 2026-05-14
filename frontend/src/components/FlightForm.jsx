@@ -55,7 +55,7 @@ const FlightForm = ({
     try {
       if (editingFlight) {
         const response = await axiosInstance.put(
-          `/api/flights/${editingFlight._id}`,
+          `/api/records/${editingFlight._id}`,
           formData,
           {
             headers: { Authorization: `Bearer ${user.token}` },
@@ -72,7 +72,7 @@ const FlightForm = ({
           ),
         );
       } else {
-        const response = await axiosInstance.post("/api/flights", formData, {
+        const response = await axiosInstance.post("/api/records", formData, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setFlights([...flights, response.data]);
