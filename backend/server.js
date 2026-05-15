@@ -17,7 +17,7 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/records", require("./routes/bookingRecordRoutes"));
+app.use("/api/bookings", require("./routes/bookingRecordRoutes"));
 
 // Export the app object for testing
 if (require.main === module) {

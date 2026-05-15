@@ -1,36 +1,50 @@
 const mongoose = require("mongoose");
 
-const aviationSchema = new mongoose.Schema(
+const aviationDataSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
+    airline: {
+      type: String,
       required: true,
-      ref: "User",
     },
     flightNumber: {
       type: String,
       required: true,
       unique: true,
-      match: /^[A-Z]{2}\d{3}$/,
     },
-    destination: {
+    departureAirport: {
       type: String,
       required: true,
-      match: /^[A-Z]{3}$/,
+      maxLength: 3, // e.g., JFK, SFO
     },
-    departureDate: {
+    arrivalAirport: {
+      type: String,
+      required: true,
+      maxLength: 3,
+    },
+    departureTime: {
       type: Date,
       required: true,
     },
+    arrivalTime: {
+      type: Date,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    availableSeats: {
+      type: Number,
+      required: true,
+      default: 150,
+    },
     status: {
       type: String,
-      enum: ["Scheduled", "Delayed", "Cancelled", "Departed"],
-      default: "Scheduled",
+      enum: ["scheduled", "delayed", "cancelled", "completed"],
+      default: "scheduled",
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-module.exports = mongoose.model("AviationDatas", aviationSchema);
+module.exports = mongoose.model("AviationData", aviationDataSchema);

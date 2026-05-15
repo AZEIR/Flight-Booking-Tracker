@@ -1,93 +1,154 @@
 const BookingRecord = require("../models/BookingRecords");
+const AviationData = require("../models/AviationDatas");
 
-// GET /flights
-const getBookingRecords = async (req, res) => {
+// @route   GET /bookings
+const getBookings = async (req, res) => {
   try {
-    const bookingRecord = await BookingRecord.find({ user: req.user.id });
-    res.status(200).json(bookingRecord);
+    const bookingRecords = await BookingRecord.find({ user: req.user.id });
+    res.status(200).json(bookingRecords);
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to retrieve Booking Records",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Failed to restieve booking", error: error.message });
   }
 };
 
-// POST /flights
-const addBookingRecords = async (req, res) => {
-  const { flightNumber, destination, departureDate, status } = req.body;
-
-  // maybe add validation
-  if (!flightNumber || !destination || !departureDate) {
-    return res.status(400).json({ message: "Please add all required fields" });
-  }
-
+// @route   POST /bookings
+const createBooking = async (req, res) => {
+  const { flightId, passengers } = req.body;
   try {
-    const bookingRecord = await BookingRecord.create({
+    const flight = await AviationData.findById(flightId);
+    //    Error for failing to retrieve flight.
+    if (!flight) {
+      return res.status(404).json({ message: "Flight not found" });
+    }
+    //    Check flight available seats
+    if (flight.availableSeats < passengers) {
+      return res.status(404).json({ message: "Not enough seats available" });
+    }
+
+    // Generate random 6-character ref code
+    const totalPrice = flight.price * passengers;
+    const bookingReference = Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
+
+    const newBooking = await BookingRecord.create({
       user: req.user.id,
-      flightNumber,
-      destination,
-      departureDate,
-      status,
+      flight: flightId,
+      bookingReference: bookingReference,
+      passengers: passengers,
+      totalPrice: totalPrice,
+      bookingStatus: "active",
     });
-    res.status(201).json(bookingRecord);
+
+    flight.availableSeats = flight.availableSeats - passengers;
+    await flight.save();
+    res.status(201).json(newBooking);
   } catch (error) {
     res.status(500).json({
-      message: "Failed to create a new booking record",
+      message: "Server error while creating booking",
       error: error.message,
     });
   }
 };
 
-// PUT /flights/:id
-const updateBookingRecords = async (req, res) => {
+// @route   PUT /bookings/:id
+const updateBooking = async (req, res) => {
+  const { newPassengers, adminPriceOverride } = req.body;
+
   try {
-    const bookingRecord = await BookingRecord.findById(req.params.id);
-    if (!bookingRecord) {
+    const booking = await BookingRecord.findById(req.params.id);
+
+    if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-    if (bookingRecord.user.toString() !== req.user.id) {
-      return res.status(404).json({ message: "User not authorized" });
+
+    if (booking.bookingStatus === "cancelled") {
+      return res
+        .status(400)
+        .json({ message: "Cannot update a cancelled booking" });
     }
-    const updatedbookingRecord = await Booking.findByIdAndUpdate(
-      req.params.id,
-      req.body, // get data from front-end
-      { new: true }, //tell Mongo to return updated document
-    );
-    res.status(200).json(updatedbookingRecord);
+
+    if (newPassengers && newPassengers !== booking.passengers) {
+      const flight = await AviationData.findById(booking.flight);
+
+      // Positive = adding people, Negative = removing people
+      const passengerDifference = newPassengers - booking.passengers;
+
+      if (
+        passengerDifference > 0 &&
+        flight.availableSeats < passengerDifference
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Not enough extra seats available on this flight" });
+      }
+
+      flight.availableSeats = flight.availableSeats - passengerDifference;
+      await flight.save();
+
+      booking.passengers = newPassengers;
+      booking.totalPrice = flight.price * newPassengers;
+    }
+
+    if (adminPriceOverride != undefined) {
+      booking.totalPrice = adminPriceOverride;
+    }
+
+    await booking.save();
+
+    res.status(200).json({
+      message: "Booking updated successfully",
+      booking: booking,
+    });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to update a booking record",
+      message: "Server error while updating booking",
       error: error.message,
     });
   }
 };
 
-// DELETE flights/:id
-const cancleBookingRecords = async (req, res) => {
+// @route   PATCH /bookings/:id/cancel
+const cancelBooking = async (req, res) => {
   try {
-    const bookingRecord = await BookingRecord.findById(req.params.id);
-    if (!bookingRecord) {
-      return res.status(404).json({ message: "Booking record not found" });
+    const booking = await BookingRecord.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
     }
-    if (bookingRecord.user.toString() !== req.user.id) {
-      return res.status(404).json({ mmessage: "User not authorized" });
+
+    if (booking.bookingStatus === "cancelled") {
+      return res.status(400).json({ message: "Booking is already cancelled" });
     }
-    await bookingRecord.deleteOne();
+    // Change status to cancelled
+    booking.bookingStatus = "cancelled";
+    await booking.save();
+
+    // Add passenger availablity back to aviationdata
+    const flight = await AviationData.findById(booking.flight);
+    if (flight) {
+      flight.availableSeats = flight.availableSeats + booking.passengers;
+      await flight.save();
+    }
+
     res.status(200).json({
-      id: req.params.id,
-      message: "Booking record cancelled successfully",
+      message: "Booking cancelled successfully",
+      booking: booking,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Failed to delete a booking record",
+      message: "Server error while cancelling booking",
       error: error.message,
     });
   }
 };
+
 module.exports = {
-  getBookingRecords,
-  addBookingRecords,
-  updateBookingRecords,
-  cancleBookingRecords,
+  getBookings,
+  createBooking,
+  updateBooking,
+  cancelBooking,
 };

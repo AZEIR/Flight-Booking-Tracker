@@ -2,20 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getBookingRecords,
-  addBookingRecords,
-  updateBookingRecords,
-  cancleBookingRecords,
+  getBookings,
+  createBooking,
+  updateBooking,
+  cancelBooking,
 } = require("../controllers/bookingRecordController");
 const { protect } = require("../middleware/authMiddleware");
 
-router
-  .route("/")
-  .get(protect, getBookingRecords)
-  .post(protect, addBookingRecords);
-router
-  .route("/:id")
-  .put(protect, updateBookingRecords)
-  .delete(protect, cancleBookingRecords);
+router.route("/").get(protect, getBookings).post(protect, createBooking);
+router.route("/:id").put(protect, updateBooking);
+router.route("/:id/cancel").patch(protect, cancelBooking);
 
 module.exports = router;

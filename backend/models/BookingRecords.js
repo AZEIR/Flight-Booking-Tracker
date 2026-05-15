@@ -1,36 +1,39 @@
 const mongoose = require("mongoose");
 
-const bookingSchema = new mongoose.Schema(
+const bookingRecordSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
-    flightNumber: {
+    flight: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "AviationData",
+    },
+    // Generate human readable Ref code via bycrypt
+    bookingReference: {
       type: String,
       required: true,
       unique: true,
-      match: /^[A-Z]{2}\d{3}$/,
     },
-    destination: {
-      type: String,
+    passengers: {
+      type: Number,
       required: true,
-      match: /^[A-Z]{3}$/,
+      default: 1,
     },
-    departureDate: {
-      type: Date,
+    totalPrice: {
+      type: Number,
       required: true,
     },
-    status: {
+    bookingStatus: {
       type: String,
-      enum: ["Scheduled", "Delayed", "Cancelled", "Departed"],
-      default: "Scheduled",
+      enum: ["active", "cancelled"],
+      default: "active",
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-module.exports = mongoose.model("BookingRecords", bookingSchema);
+module.exports = mongoose.model("BookingRecord", bookingRecordSchema);
