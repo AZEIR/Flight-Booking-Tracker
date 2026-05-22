@@ -49,9 +49,12 @@ const loginUser = async (req, res) => {
       });
 
       res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
+        message: "Login successful",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });

@@ -33,7 +33,7 @@ const bookingRecordSchema = new mongoose.Schema(
       default: "active",
     },
   },
-  { timestamps: true },
+  { timestamps: true, autoIndex: true },
 );
-
+bookingRecordSchema.index({ flightNumber: 1 }, { unique: false, sparse: true });
 module.exports = mongoose.model("BookingRecord", bookingRecordSchema);

@@ -1,15 +1,24 @@
 const BookingRecord = require("../models/BookingRecords");
 const AviationData = require("../models/AviationDatas");
+const crypto = require("crypto");
 
 // @route   GET /bookings
 const getBookings = async (req, res) => {
   try {
-    const bookingRecords = await BookingRecord.find({ user: req.user.id });
+    let bookingRecords;
+    if (req.user.role === "admin") {
+      bookingRecords = await BookingRecord.find().populate(
+        "user",
+        "name email",
+      );
+    } else {
+      bookingRecords = await BookingRecord.find({ user: req.user.id });
+    }
     res.status(200).json(bookingRecords);
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to restieve booking", error: error.message });
+      .json({ message: "Failed to retrieve booking", error: error.message });
   }
 };
 
@@ -29,10 +38,12 @@ const createBooking = async (req, res) => {
 
     // Generate random 6-character ref code
     const totalPrice = flight.price * passengers;
-    const bookingReference = Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+    const bookingReference = crypto
+      .randomBytes(4)
+      .toString("base64")
+      .slice(0, 6)
+      .toUpperCase()
+      .replace(/[^a-zA-Z0-9]/g, "X");
 
     const newBooking = await BookingRecord.create({
       user: req.user.id,
@@ -71,10 +82,17 @@ const updateBooking = async (req, res) => {
         .json({ message: "Cannot update a cancelled booking" });
     }
 
-    if (newPassengers && newPassengers !== booking.passengers) {
-      const flight = await AviationData.findById(booking.flight);
+    const flight = await AviationData.findById(booking.flight);
 
-      // Positive = adding people, Negative = removing people
+    const hoursUntilDeparture =
+      (new Date(flight.departureTime) - new Date()) / (1000 * 60 * 60);
+    if (hoursUntilDeparture < 24 && req.user.role !== "admin") {
+      return res.status(400).json({
+        message: "Modifications are locked within 24 hours of departure.",
+      });
+    }
+
+    if (newPassengers && newPassengers !== booking.passengers) {
       const passengerDifference = newPassengers - booking.passengers;
 
       if (
@@ -116,23 +134,36 @@ const cancelBooking = async (req, res) => {
   try {
     const booking = await BookingRecord.findById(req.params.id);
 
+    // Validate booking
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-
     if (booking.bookingStatus === "cancelled") {
       return res.status(400).json({ message: "Booking is already cancelled" });
     }
-    // Change status to cancelled
+
+    const flight = await AviationData.findById(booking.flight);
+
+    // check if flight data was deleted
+    if (!flight) {
+      return res
+        .status(404)
+        .json({ message: "Associated flight data not found." });
+    }
+
+    const hasDeparted = new Date() > new Date(flight.departureTime);
+    if (hasDeparted) {
+      return res
+        .status(400)
+        .json({ message: "Cannot cancel a flight that has already departed." });
+    }
+
+    // update database
     booking.bookingStatus = "cancelled";
     await booking.save();
 
-    // Add passenger availablity back to aviationdata
-    const flight = await AviationData.findById(booking.flight);
-    if (flight) {
-      flight.availableSeats = flight.availableSeats + booking.passengers;
-      await flight.save();
-    }
+    flight.availableSeats = flight.availableSeats + booking.passengers;
+    await flight.save();
 
     res.status(200).json({
       message: "Booking cancelled successfully",
