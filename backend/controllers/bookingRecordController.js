@@ -24,8 +24,20 @@ const getBookings = async (req, res) => {
 
 // @route   POST /bookings
 const createBooking = async (req, res) => {
-  const { flightId, passengers } = req.body;
+  const { flightId, passengers, targetUserId } = req.body;
+  // validate passenger number is larger then 1
+  if (!passengers || passengers < 1) {
+    return res
+      .status(400)
+      .json({ message: "Passenger count must be at least 1." });
+  }
   try {
+    // Check if optional userId is entered for admin to create booking for user
+    let bookingOwnerId = req.user.id;
+    if (req.user.role === "admin" && targetUserId) {
+      bookingOwnerId = targetUserId;
+    }
+
     const flight = await AviationData.findById(flightId);
     //    Error for failing to retrieve flight.
     if (!flight) {
@@ -36,8 +48,8 @@ const createBooking = async (req, res) => {
       return res.status(404).json({ message: "Not enough seats available" });
     }
 
-    // Generate random 6-character ref code
     const totalPrice = flight.price * passengers;
+    // Generate random 6-character ref code
     const bookingReference = crypto
       .randomBytes(4)
       .toString("base64")
@@ -46,7 +58,7 @@ const createBooking = async (req, res) => {
       .replace(/[^a-zA-Z0-9]/g, "X");
 
     const newBooking = await BookingRecord.create({
-      user: req.user.id,
+      user: bookingOwnerId,
       flight: flightId,
       bookingReference: bookingReference,
       passengers: passengers,
@@ -69,19 +81,28 @@ const createBooking = async (req, res) => {
 const updateBooking = async (req, res) => {
   const { newPassengers, adminPriceOverride } = req.body;
 
+  // validate newPassengers is more then 1 and is not undefined
+  if (newPassengers !== undefined && newPassengers < 1) {
+    return res
+      .status(400)
+      .json({ message: "Passenger count must be at least 1." });
+  }
   try {
+    const booking = await BookingRecord.findById(req.params.id);
+
+    // check if booking exist
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // check ownership
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ message: "Not authoaised to modify this booking." });
     }
 
-    const booking = await BookingRecord.findById(req.params.id);
-
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
+    // check if booking is cnacelled
     if (booking.bookingStatus === "cancelled") {
       return res
         .status(400)
@@ -90,6 +111,7 @@ const updateBooking = async (req, res) => {
 
     const flight = await AviationData.findById(booking.flight);
 
+    // check if departure time is within 24hr
     const hoursUntilDeparture =
       (new Date(flight.departureTime) - new Date()) / (1000 * 60 * 60);
     if (hoursUntilDeparture < 24 && req.user.role !== "admin") {
@@ -138,24 +160,24 @@ const updateBooking = async (req, res) => {
 // @route   PATCH /bookings/:id/cancel
 const cancelBooking = async (req, res) => {
   try {
+    const booking = await BookingRecord.findById(req.params.id);
+    // Validate booking
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // check ownership
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ message: "Not authoaised to modify this booking." });
     }
 
-    const booking = await BookingRecord.findById(req.params.id);
-
-    // Validate booking
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
     if (booking.bookingStatus === "cancelled") {
       return res.status(400).json({ message: "Booking is already cancelled" });
     }
 
     const flight = await AviationData.findById(booking.flight);
-
     // check if flight data was deleted
     if (!flight) {
       return res
@@ -164,7 +186,8 @@ const cancelBooking = async (req, res) => {
     }
 
     const hasDeparted = new Date() > new Date(flight.departureTime);
-    if (hasDeparted) {
+    // let Admin bypass cancel flight that's been departed
+    if (hasDeparted && req.user.role !== "admin") {
       return res
         .status(400)
         .json({ message: "Cannot cancel a flight that has already departed." });
