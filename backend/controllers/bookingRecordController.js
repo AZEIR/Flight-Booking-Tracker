@@ -70,6 +70,12 @@ const updateBooking = async (req, res) => {
   const { newPassengers, adminPriceOverride } = req.body;
 
   try {
+    if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Not authoaised to modify this booking." });
+    }
+
     const booking = await BookingRecord.findById(req.params.id);
 
     if (!booking) {
@@ -132,6 +138,12 @@ const updateBooking = async (req, res) => {
 // @route   PATCH /bookings/:id/cancel
 const cancelBooking = async (req, res) => {
   try {
+    if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Not authoaised to modify this booking." });
+    }
+
     const booking = await BookingRecord.findById(req.params.id);
 
     // Validate booking
