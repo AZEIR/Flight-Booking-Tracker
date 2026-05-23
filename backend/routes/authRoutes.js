@@ -8,6 +8,9 @@ const {
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
+const responseDecorator = require("../middleware/responseDecorator");
+
+router.use(responseDecorator);
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
