@@ -1,81 +1,48 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 
 const Profile = () => {
-  const { user } = useAuth(); // Access user token from context
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-  });
-  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch profile data from the backend
     const fetchProfile = async () => {
-      setLoading(true);
       try {
-        const response = await axiosInstance.get("/api/auth/profile", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setFormData({
-          name: response.data.name,
-          email: response.data.email,
-        });
+        // FIXED: Changed from "/api/auth/profile" to "/auth/profile"
+        const response = await axiosInstance.get("/auth/profile");
+        setProfileData(response.data);
       } catch (error) {
-        alert("Failed to fetch profile. Please try again.");
+        console.error("Failed to fetch profile info:", error);
       } finally {
         setLoading(false);
       }
     };
+    fetchProfile();
+  }, []);
 
-    if (user) fetchProfile();
-  }, [user]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await axiosInstance.put("/api/auth/profile", formData, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      alert("Profile updated successfully!");
-    } catch (error) {
-      alert("Failed to update profile. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
-  }
+  if (loading) return <div className="p-8 text-center">Loading profile...</div>;
+  if (!profileData)
+    return (
+      <div className="p-8 text-center text-red-500">
+        Failed to load user credentials.
+      </div>
+    );
 
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Your Profile</h1>
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded"
-        >
-          {loading ? "Updating..." : "Update Profile"}
-        </button>
-      </form>
+    <div className="max-w-md mx-auto mt-20 bg-white p-6 shadow-md rounded">
+      <h1 className="text-2xl font-bold mb-4 text-center">User Profile</h1>
+      <div className="space-y-2">
+        <p>
+          <strong>Name:</strong> {profileData.name}
+        </p>
+        <p>
+          <strong>Email:</strong> {profileData.email}
+        </p>
+        <p>
+          <strong>Role:</strong>{" "}
+          <span className="capitalize">{profileData.role || "user"}</span>
+        </p>
+      </div>
     </div>
   );
 };

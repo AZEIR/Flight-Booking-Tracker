@@ -11,7 +11,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post("/api/auth/login", formData);
+      // CHANGED: Removed the duplicate /api segment
+      const response = await axiosInstance.post("/auth/login", formData);
       login(response.data);
       navigate("/");
     } catch (error) {
@@ -29,6 +30,7 @@ const Login = () => {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <input
           type="password"
@@ -38,6 +40,7 @@ const Login = () => {
             setFormData({ ...formData, password: e.target.value })
           }
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <button
           type="submit"

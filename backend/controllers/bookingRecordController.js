@@ -1,5 +1,6 @@
 const BookingRecord = require("../models/BookingRecords");
 const AviationData = require("../models/AviationDatas");
+const User = require("../models/User");
 const crypto = require("crypto");
 
 // @route   GET /bookings
@@ -25,32 +26,41 @@ const getBookings = async (req, res) => {
 
 // @route   POST /bookings
 const createBooking = async (req, res) => {
-  const { flightId, passengers, targetUserId } = req.body;
-  // validate passenger number is larger then 1
+  const { flightId, passengers, targetUserEmail } = req.body;
+
   if (!passengers || passengers < 1) {
     return res
       .status(400)
       .json({ message: "Passenger count must be at least 1." });
   }
+
   try {
-    // Check if optional userId is entered for admin to create booking for user
     let bookingOwnerId = req.user.id;
-    if (req.user.role === "admin" && targetUserId) {
-      bookingOwnerId = targetUserId;
+
+    if (req.user.role === "admin" && targetUserEmail) {
+      const targetUser = await User.findOne({
+        email: targetUserEmail.toLowerCase(),
+      });
+
+      if (!targetUser) {
+        return res.status(404).json({
+          message: `Administrative Error: No account registered with email address "${targetUserEmail}".`,
+        });
+      }
+      bookingOwnerId = targetUser._id;
     }
 
     const flight = await AviationData.findById(flightId);
-    //    Error for failing to retrieve flight.
     if (!flight) {
       return res.status(404).json({ message: "Flight not found" });
     }
-    //    Check flight available seats
+
     if (flight.availableSeats < passengers) {
-      return res.status(404).json({ message: "Not enough seats available" });
+      return res.status(400).json({ message: "Not enough seats available" });
     }
 
     const totalPrice = flight.price * passengers;
-    // Generate random 6-character ref code
+
     const bookingReference = crypto
       .randomBytes(4)
       .toString("base64")
@@ -69,6 +79,7 @@ const createBooking = async (req, res) => {
 
     flight.availableSeats = flight.availableSeats - passengers;
     await flight.save();
+
     res.status(201).json(newBooking);
   } catch (error) {
     res.status(500).json({
