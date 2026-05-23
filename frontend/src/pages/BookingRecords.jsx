@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 const BookingRecords = () => {
-  // --- 1. STATE MANAGEMENT ---
+  // --- STATE MANAGEMENT ---
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,7 +24,7 @@ const BookingRecords = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // --- 2. FETCH REAL DATA FROM BACKEND ---
+  // --- FETCH REAL DATA FROM BACKEND ---
   useEffect(() => {
     fetchBookings();
   }, []);
@@ -44,7 +44,7 @@ const BookingRecords = () => {
     }
   };
 
-  // --- 3. FORMATTING & LOGIC UTILITIES ---
+  // --- FORMATTING & LOGIC UTILITIES ---
 
   const formatTime = (dateString) => {
     if (!dateString) return "--:--";
@@ -88,12 +88,12 @@ const BookingRecords = () => {
     const diffMs = dep - now;
     const diffHours = diffMs / (1000 * 60 * 60);
 
-    // Flight has already left
+    // Flight has already left (Changed to Indigo to distinguish from Cancelled)
     if (diffHours <= 0) {
       return {
         state: "departed",
         label: "Flight Departed",
-        color: "text-gray-600 bg-gray-100 border border-gray-200",
+        color: "text-indigo-700 bg-indigo-50 border border-indigo-200",
       };
     }
 
@@ -187,7 +187,7 @@ const BookingRecords = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#f7f9fc] flex items-center justify-center">
-        <div className="text-blue-600 font-bold text-lgtracking-wide">
+        <div className="text-blue-600 font-bold text-lg tracking-wide">
           <h2>Fetching Booking info...</h2>
         </div>
       </div>
@@ -239,15 +239,16 @@ const BookingRecords = () => {
               const arrivalTime = booking.flight?.arrivalTime;
 
               const flightStatus = getFlightStatusDetails(departureTime);
+              const isDeparted = flightStatus.state === "departed";
 
               return (
                 <div
                   key={booking._id}
-                  className={`flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-200 shadow-sm
+                  className={`flex flex-col bg-white border rounded-xl overflow-hidden transition-all duration-200 shadow-sm
                     ${
                       isCancelled
-                        ? "opacity-70 grayscale-[50%]"
-                        : "hover:shadow-md hover:border-blue-200"
+                        ? "opacity-80 border-red-100" // Grayscale removed so red shines through
+                        : "border-gray-200 hover:shadow-md hover:border-blue-200"
                     } `}
                 >
                   {/* --- TOP: Identity & Core Status --- */}
@@ -257,8 +258,10 @@ const BookingRecords = () => {
                         className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-base 
                           ${
                             isCancelled
-                              ? "bg-gray-100 text-gray-500"
-                              : "bg-blue-100 text-blue-700"
+                              ? "bg-red-100 text-red-700"
+                              : isDeparted
+                                ? "bg-indigo-100 text-indigo-700"
+                                : "bg-blue-100 text-blue-700"
                           }`}
                       >
                         {booking.user?.name
@@ -280,7 +283,7 @@ const BookingRecords = () => {
                         className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider 
                           ${
                             isCancelled
-                              ? "bg-gray-100 text-gray-600 border border-gray-200"
+                              ? "bg-red-50 text-red-700 border border-red-200"
                               : "bg-green-50 text-green-700 border border-green-200"
                           }`}
                       >
@@ -310,19 +313,38 @@ const BookingRecords = () => {
                         <div className="flex items-center w-full max-w-sm gap-3">
                           <div
                             className={`h-[2px] flex-1 rounded-full ${
-                              isCancelled ? "bg-gray-200" : "bg-blue-200"
+                              isCancelled
+                                ? "bg-red-200"
+                                : isDeparted
+                                  ? "bg-indigo-200"
+                                  : "bg-blue-200"
                             }`}
                           ></div>
+
+                          {/* DYNAMIC ICON LOGIC */}
                           <span
                             className={`material-symbols-outlined text-3xl ${
-                              isCancelled ? "text-gray-400" : "text-blue-600"
+                              isCancelled
+                                ? "text-red-500"
+                                : isDeparted
+                                  ? "text-indigo-600"
+                                  : "text-blue-600"
                             }`}
                           >
-                            {isCancelled ? "flight_land" : "flight_takeoff"}
+                            {isCancelled
+                              ? "airplanemode_inactive"
+                              : isDeparted
+                                ? "flight_land"
+                                : "flight_takeoff"}
                           </span>
+
                           <div
                             className={`h-[2px] flex-1 rounded-full ${
-                              isCancelled ? "bg-gray-200" : "bg-blue-200"
+                              isCancelled
+                                ? "bg-red-200"
+                                : isDeparted
+                                  ? "bg-indigo-200"
+                                  : "bg-blue-200"
                             }`}
                           ></div>
                         </div>
@@ -332,14 +354,16 @@ const BookingRecords = () => {
                           className={`text-sm font-bold tracking-wider mt-3 px-4 py-1 rounded-full border transition-colors 
                             ${
                               isCancelled
-                                ? "text-gray-500 bg-gray-50 border-gray-200"
-                                : "text-blue-700 bg-blue-50 border-blue-200"
+                                ? "text-red-700 bg-red-50 border-red-200"
+                                : isDeparted
+                                  ? "text-indigo-700 bg-indigo-50 border-indigo-200"
+                                  : "text-blue-700 bg-blue-50 border-blue-200"
                             }`}
                         >
                           {flightNumber}
                         </span>
 
-                        {/* 24-HOUR WARNING BADGE */}
+                        {/* 24-HOUR WARNING / DEPARTED BADGE */}
                         {!isCancelled && (
                           <span
                             className={`mt-3 px-3 py-1 rounded-full text-xs font-bold tracking-wide ${flightStatus.color}`}
@@ -480,7 +504,6 @@ const BookingRecords = () => {
                             <span className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">
                               Ledger Amount
                             </span>
-                            {/* Blue used as the highlight color for money as requested */}
                             <span className="text-base font-extrabold text-blue-600 tracking-wide">
                               ${booking.totalPrice.toFixed(2)}
                             </span>
@@ -490,7 +513,7 @@ const BookingRecords = () => {
                         {/* Standard Actions */}
                         <div className="flex gap-3 w-full md:w-auto shrink-0 mt-4 md:mt-0">
                           {isCancelled ? (
-                            <div className="w-full text-center px-6 py-2.5 rounded-xl border border-gray-200 bg-gray-100 text-gray-500 text-xs font-bold uppercase tracking-widest cursor-not-allowed">
+                            <div className="w-full text-center px-6 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-500 text-xs font-bold uppercase tracking-widest cursor-not-allowed">
                               Terminal State
                             </div>
                           ) : (

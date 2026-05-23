@@ -11,7 +11,9 @@ const getBookings = async (req, res) => {
         .populate("user", "name email")
         .populate("flight");
     } else {
-      bookingRecords = await BookingRecord.find({ user: req.user.id });
+      bookingRecords = await BookingRecord.find({ user: req.user.id }).populate(
+        "flight",
+      );
     }
     res.status(200).json(bookingRecords);
   } catch (error) {
