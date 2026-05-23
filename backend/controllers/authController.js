@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const UserFactory = require("../factories/userFactory");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -7,14 +8,13 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role = "user" } = req.body;
   try {
     const userExists = await User.findOne({ email });
     if (userExists)
       return res.status(400).json({ message: "User already exists" });
 
-    const user = await User.create({ name, email, password });
-
+    const user = await UserFactory.createUser(role, { name, email, password });
     const token = generateToken(user.id);
 
     res.cookie("token", token, {
@@ -28,6 +28,7 @@ const registerUser = async (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -54,6 +55,7 @@ const loginUser = async (req, res) => {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role,
         },
       });
     } else {

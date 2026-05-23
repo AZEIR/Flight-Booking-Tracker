@@ -7,10 +7,9 @@ const getBookings = async (req, res) => {
   try {
     let bookingRecords;
     if (req.user.role === "admin") {
-      bookingRecords = await BookingRecord.find().populate(
-        "user",
-        "name email",
-      );
+      bookingRecords = await BookingRecord.find()
+        .populate("user", "name email")
+        .populate("flight");
     } else {
       bookingRecords = await BookingRecord.find({ user: req.user.id });
     }
