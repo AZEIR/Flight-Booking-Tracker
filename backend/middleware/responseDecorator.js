@@ -21,6 +21,9 @@ const responseDecorator = (req, res, next) => {
     if (isSuccess === true) {
       if (body && body.data) {
         decoratedResponse.data = body.data;
+      } else if (Array.isArray(body)) {
+        // Leave arrays exactly as they are!
+        decoratedResponse.data = body;
       } else {
         decoratedResponse.data =
           body && typeof body === "object" ? { ...body } : body || null;

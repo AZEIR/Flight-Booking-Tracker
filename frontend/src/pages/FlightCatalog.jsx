@@ -24,7 +24,8 @@ const FlightCatalog = () => {
         setIsLoading(true);
         const response = await axiosInstance.get("/flights");
 
-        setFlights(response.data.data || response.data || []);
+        const fetchedData = response.data.data || response.data;
+        setFlights(Array.isArray(fetchedData) ? fetchedData : []);
       } catch (err) {
         console.error("Failed to load flights:", err);
         setErrorMsg(

@@ -23,7 +23,8 @@ const BookingRecords = () => {
     try {
       setIsLoading(true);
       const { data } = await axiosInstance.get("/bookings");
-      setBookings(data.data || data || []);
+      const fetchedBookings = data?.data || data;
+      setBookings(Array.isArray(fetchedBookings) ? fetchedBookings : []);
     } catch (error) {
       console.error("Failed to fetch records:", error);
       setErrorMsg(
@@ -98,8 +99,8 @@ const BookingRecords = () => {
   const handleEditClick = (booking) => {
     setEditingId(booking._id);
     setEditForm({
-      paxCount: booking.passengers.toString(),
-      priceOverride: booking.totalPrice.toString(),
+      paxCount: booking.passengers?.toString() || "1",
+      priceOverride: booking.totalPrice?.toString() || "0",
     });
     setErrorMsg("");
   };
@@ -440,6 +441,12 @@ const BookingRecords = () => {
           )}
         </section>
       </main>
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl font-bold flex items-center gap-3 animate-bounce z-50">
+          <span className="material-symbols-outlined">check_circle</span>
+          Booking updated successfully!
+        </div>
+      )}
     </div>
   );
 };
