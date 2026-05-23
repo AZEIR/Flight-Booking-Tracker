@@ -8,9 +8,8 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // FIXED: Changed from "/api/auth/profile" to "/auth/profile"
         const response = await axiosInstance.get("/auth/profile");
-        setProfileData(response.data);
+        setProfileData(response.data.data);
       } catch (error) {
         console.error("Failed to fetch profile info:", error);
       } finally {

@@ -1,4 +1,3 @@
-// src/pages/BookingRecords.jsx
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../axiosConfig";
 
@@ -6,7 +5,6 @@ const BookingRecords = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Inline Admin Editing States for Existing Bookings
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({
     paxCount: "1",
@@ -25,7 +23,7 @@ const BookingRecords = () => {
     try {
       setIsLoading(true);
       const { data } = await axiosInstance.get("/bookings");
-      setBookings(data);
+      setBookings(data.data);
     } catch (error) {
       console.error("Failed to fetch records:", error);
       setErrorMsg(

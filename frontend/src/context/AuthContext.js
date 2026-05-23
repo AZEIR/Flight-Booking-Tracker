@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const checkLoggedInUser = async () => {
       try {
         const response = await axiosInstance.get("/auth/profile");
-        setUser(response.data);
+        setUser(response.data.data);
       } catch (error) {
         setUser(null);
       } finally {
@@ -22,7 +22,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    setUser(userData);
+    if (userData && userData.success === true && userData.data) {
+      setUser(userData.data);
+    } else {
+      setUser(userData);
+    }
   };
 
   const logout = async () => {
