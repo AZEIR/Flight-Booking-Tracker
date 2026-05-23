@@ -24,17 +24,7 @@ const FlightCatalog = () => {
         setIsLoading(true);
         const response = await axiosInstance.get("/flights");
 
-        if (
-          response.data &&
-          response.data.success === true &&
-          Array.isArray(response.data.data)
-        ) {
-          setFlights(response.data.data);
-        } else if (Array.isArray(response.data)) {
-          setFlights(response.data);
-        } else {
-          setFlights([]);
-        }
+        setFlights(response.data.data || response.data || []);
       } catch (err) {
         console.error("Failed to load flights:", err);
         setErrorMsg(
@@ -216,13 +206,13 @@ const FlightCatalog = () => {
                     {/* Column 5: Price & Action */}
                     <div className="flex flex-col items-center md:items-end gap-2 border-l border-gray-100 pl-0 md:pl-6">
                       <div className="text-center md:text-right">
-                        <p className="text-2xl font-black text-emerald-600">
-                          ${flight.price?.toFixed(2)}
-                        </p>
                         <p
-                          className={`text-[10px] font-bold ${flight.availableSeats > 0 ? "text-blue-600" : "text-red-500"}`}
+                          className={`text-[15px] font-bold ${flight.availableSeats > 0 ? "text-blue-600" : "text-red-500"}`}
                         >
                           {flight.availableSeats} Seats Left
+                        </p>
+                        <p className="text-2xl font-black text-emerald-600">
+                          ${flight.price?.toFixed(2)}
                         </p>
                       </div>
                       <button

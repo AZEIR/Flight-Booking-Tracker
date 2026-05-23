@@ -1,11 +1,11 @@
 const responseDecorator = (req, res, next) => {
-    //1. Store the original res.json function to call later
+  //1. Store the original res.json function to call later
   const originalJson = res.json;
 
   //2. Override the standard res.json function with new behaviour
   res.json = function (body) {
     // If the response already has a 'success' property (matching the standard format), just pass it through
-    if (body && Object.prototype.hasOwnProperty.call(body, 'success')) {
+    if (body && Object.prototype.hasOwnProperty.call(body, "success")) {
       return originalJson.call(this, body);
     }
 
@@ -19,34 +19,34 @@ const responseDecorator = (req, res, next) => {
 
     //look at which data properties are present in the original response body and use
     if (isSuccess === true) {
-        if (body && body.data) {
-            decoratedResponse.data = body.data;
-        } else {
-            decoratedResponse.data = body && typeof body === 'object' ? { ...body } : (body || null);
-        }
+      if (body && body.data) {
+        decoratedResponse.data = body.data;
+      } else {
+        decoratedResponse.data =
+          body && typeof body === "object" ? { ...body } : body || null;
+      }
     } else {
-        decoratedResponse.data = null; // For error responses (isSuccess is false), set data to null
+      decoratedResponse.data = null; // For error responses (isSuccess is false), set data to null
     }
-
 
     //message field
     if (body && body.message) {
-        decoratedResponse.message = body.message;
+      decoratedResponse.message = body.message;
     } else {
-        // if custom message not provided, use default message based on success or error
-        if (isSuccess) {
-            decoratedResponse.message = "Request processed successfully.";
-        } else {
-            decoratedResponse.message = "Request failed.";
-        }
-    } 
+      // if custom message not provided, use default message based on success or error
+      if (isSuccess) {
+        decoratedResponse.message = "Request processed successfully.";
+      } else {
+        decoratedResponse.message = "Request failed.";
+      }
+    }
 
     // if controller only sent one message, not duplicating into data
     if (body && body.message && isSuccess) {
-        const keyCount= Object.keys(body).length;
-        if (keyCount === 1) {
-            decoratedResponse.data = null; // set data to null if only message is present
-        }
+      const keyCount = Object.keys(body).length;
+      if (keyCount === 1) {
+        decoratedResponse.data = null; // set data to null if only message is present
+      }
     }
 
     // 3. Call the original res.json with the decorated response
@@ -57,4 +57,3 @@ const responseDecorator = (req, res, next) => {
 };
 
 module.exports = responseDecorator;
-

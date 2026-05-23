@@ -9,7 +9,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const response = await axiosInstance.get("/auth/profile");
-        setProfileData(response.data.data);
+        setProfileData(response.data.data || response.data);
       } catch (error) {
         console.error("Failed to fetch profile info:", error);
       } finally {

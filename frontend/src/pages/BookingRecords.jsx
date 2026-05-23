@@ -23,7 +23,7 @@ const BookingRecords = () => {
     try {
       setIsLoading(true);
       const { data } = await axiosInstance.get("/bookings");
-      setBookings(data.data);
+      setBookings(data.data || data || []);
     } catch (error) {
       console.error("Failed to fetch records:", error);
       setErrorMsg(
