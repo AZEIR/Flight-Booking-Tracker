@@ -99,10 +99,10 @@ const updateBooking = async (req, res) => {
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res
         .status(403)
-        .json({ message: "Not authoaised to modify this booking." });
+        .json({ message: "Not authorised to modify this booking." });
     }
 
-    // check if booking is cnacelled
+    // check if booking is cancelled
     if (booking.bookingStatus === "cancelled") {
       return res
         .status(400)
@@ -170,7 +170,7 @@ const cancelBooking = async (req, res) => {
     if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res
         .status(403)
-        .json({ message: "Not authoaised to modify this booking." });
+        .json({ message: "Not authorised to modify this booking." });
     }
 
     if (booking.bookingStatus === "cancelled") {
