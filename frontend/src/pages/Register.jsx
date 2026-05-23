@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../axiosConfig";
 
@@ -8,14 +9,19 @@ const Register = () => {
     email: "",
     password: "",
   });
+
+  // FIXES THE 'login is not defined' COMPILATION FAILURE:
+  const { login } = useAuth();
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post("/api/auth/register", formData);
-      alert("Registration successful. Please log in.");
-      navigate("/login");
+      // Sends payload directly to centralized axios configuration mapping
+      const response = await axiosInstance.post("/auth/register", formData);
+      login(response.data);
+      navigate("/");
     } catch (error) {
       alert("Registration failed. Please try again.");
     }
@@ -24,22 +30,22 @@ const Register = () => {
   return (
     <div className="max-w-md mx-auto mt-20">
       <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          Create An Account
-        </h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">Create Account</h1>
         <input
           type="text"
-          placeholder="Name"
+          placeholder="Full Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Email Address"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <input
           type="password"
@@ -49,10 +55,11 @@ const Register = () => {
             setFormData({ ...formData, password: e.target.value })
           }
           className="w-full mb-4 p-2 border rounded"
+          required
         />
         <button
           type="submit"
-          className="w-full bg-green-600 text-white p-2 rounded"
+          className="w-full bg-blue-600 text-white p-2 rounded"
         >
           Register
         </button>

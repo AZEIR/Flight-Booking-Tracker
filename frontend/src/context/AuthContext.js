@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkLoggedInUser = async () => {
       try {
-        const response = await axiosInstance.get("/api/auth/profile");
+        const response = await axiosInstance.get("/auth/profile");
         setUser(response.data);
       } catch (error) {
         setUser(null);
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axiosInstance.post("/api/auth/logout");
+      await axiosInstance.post("/auth/logout");
       setUser(null);
     } catch (error) {
       console.error("Logout failed");

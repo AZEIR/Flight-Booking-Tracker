@@ -9,21 +9,26 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import BookingRecords from "./pages/BookingRecords";
+import FlightCatalog from "./pages/FlightCatalog";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f7f9fc] flex items-center justify-center font-sans text-gray-500 font-bold">
+        Verifying secure session status...
+      </div>
+    );
+  }
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route
-          path="/"
-          element={user ? <BookingRecords /> : <Navigate to="/login" />}
-        />
+        <Route path="/" element={<FlightCatalog />} />
 
         <Route
-          path="/booking"
+          path="/dashboard"
           element={user ? <BookingRecords /> : <Navigate to="/login" />}
         />
 
