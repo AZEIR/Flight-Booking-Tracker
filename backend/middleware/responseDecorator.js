@@ -22,7 +22,7 @@ const responseDecorator = (req, res, next) => {
         if (body && body.data) {
             decoratedResponse.data = body.data;
         } else {
-            decoratedResponse.data = body || null; // If body is empty, set data to null
+            decoratedResponse.data = body && typeof body === 'object' ? { ...body } : (body || null);
         }
     } else {
         decoratedResponse.data = null; // For error responses (isSuccess is false), set data to null
