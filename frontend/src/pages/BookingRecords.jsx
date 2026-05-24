@@ -15,7 +15,6 @@ const BookingRecords = () => {
     priceOverride: "",
   });
 
-  const [showToast, setShowToast] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -73,8 +72,6 @@ const BookingRecords = () => {
         payload.adminPriceOverride = parseFloat(editForm.priceOverride);
       }
       await axiosInstance.put(`/bookings/${bookingId}`, payload);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 4000);
       await fetchBookings();
       setEditingId(null);
     } catch (error) {
