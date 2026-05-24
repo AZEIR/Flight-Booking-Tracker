@@ -60,7 +60,9 @@ const AdminBookingCard = ({
   return (
     <div
       className={`flex flex-col bg-white border rounded-xl overflow-hidden transition-all duration-200 shadow-sm ${
-        isCancelled ? "opacity-80 border-red-100" : "border-gray-200 hover:shadow-md"
+        isCancelled
+          ? "opacity-80 border-red-100"
+          : "border-gray-200 hover:shadow-md"
       }`}
     >
       {/* Card Header */}
@@ -75,13 +77,17 @@ const AdminBookingCard = ({
                   : "bg-blue-100 text-blue-700"
             }`}
           >
-            {booking.user?.name ? booking.user.name.charAt(0).toUpperCase() : "U"}
+            {booking.user?.name
+              ? booking.user.name.charAt(0).toUpperCase()
+              : "U"}
           </div>
           <div>
             <p className="font-bold text-gray-900">
               {booking.user?.name || "Standard User"}
             </p>
-            <p className="text-sm text-gray-500">{booking.user?.email || "N/A"}</p>
+            <p className="text-sm text-gray-500">
+              {booking.user?.email || "N/A"}
+            </p>
           </div>
         </div>
         {isCancelled && (
@@ -109,9 +115,7 @@ const AdminBookingCard = ({
         {/* Visual Pathway Ribbon */}
         <div className="flex flex-col flex-1 px-4 items-center justify-center">
           <div className="flex items-center w-full max-w-sm gap-3">
-            <div
-              className={`h-[2px] flex-1 rounded-full ${theme.line}`}
-            ></div>
+            <div className={`h-[2px] flex-1 rounded-full ${theme.line}`}></div>
 
             <span
               className={`material-symbols-outlined text-3xl ${theme.icon}`}
@@ -123,9 +127,7 @@ const AdminBookingCard = ({
                   : "flight_takeoff"}
             </span>
 
-            <div
-              className={`h-[2px] flex-1 rounded-full ${theme.line}`}
-            ></div>
+            <div className={`h-[2px] flex-1 rounded-full ${theme.line}`}></div>
           </div>
 
           <span
@@ -168,12 +170,15 @@ const AdminBookingCard = ({
                 </label>
                 <select
                   value={editForm.paxCount}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const newPaxCount = parseInt(e.target.value, 10);
+                    const flightPrice = booking.flight?.price || 0;
                     setEditForm({
                       ...editForm,
                       paxCount: e.target.value,
-                    })
-                  }
+                      priceOverride: (flightPrice * newPaxCount).toString(),
+                    });
+                  }}
                   className="bg-white border rounded-xl px-3 py-2 w-full text-base font-medium outline-none focus:border-blue-500"
                 >
                   {[1, 2, 3, 4, 5, 6].map((num) => (
@@ -224,13 +229,17 @@ const AdminBookingCard = ({
                 <span className="text-xs text-gray-400 block font-bold uppercase">
                   Ref Code
                 </span>
-                <span className="font-mono font-bold">#{booking.bookingReference}</span>
+                <span className="font-mono font-bold">
+                  #{booking.bookingReference}
+                </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">
                   Booked On
                 </span>
-                <span className="text-sm">{formatTimestamp(booking.createdAt)}</span>
+                <span className="text-sm">
+                  {formatTimestamp(booking.createdAt)}
+                </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">

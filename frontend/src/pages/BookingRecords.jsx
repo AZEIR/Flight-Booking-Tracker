@@ -169,12 +169,6 @@ const BookingRecords = () => {
           )}
         </section>
       </main>
-      {showToast && (
-        <div className="fixed bottom-6 right-6 bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl font-bold flex items-center gap-3 animate-bounce z-50">
-          <span className="material-symbols-outlined">check_circle</span>
-          Booking updated successfully!
-        </div>
-      )}
     </div>
   );
 };
