@@ -1,13 +1,20 @@
 const AviationData = require("../models/AviationDatas");
+const BaseController = require("./baseController");
 
-const getAvailableFlights = async (req, res) => {
-  try {
-    const liveSchedules = await AviationData.find({});
+class FlightRoutesController extends BaseController {
+  // Retrieve all available flight schedules from the database
+  getAvailableFlights = async (req, res) => {
+    try {
+      const liveSchedules = await AviationData.find({});
+      this.sendSuccess(
+        res,
+        liveSchedules,
+        "Available flights retrieved successfully",
+      );
+    } catch (error) {
+      this.sendError(res, error, "Failed to retrieve flights");
+    }
+  };
+}
 
-    res.status(200).json(liveSchedules);
-  } catch (error) {
-    res.status(500).json({ message: "Error", error: error.message });
-  }
-};
-
-module.exports = { getAvailableFlights };
+module.exports = new FlightRoutesController();
