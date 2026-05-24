@@ -25,7 +25,16 @@ const FlightCatalog = () => {
         const response = await axiosInstance.get("/flights");
 
         const fetchedData = response.data.data || response.data;
-        setFlights(Array.isArray(fetchedData) ? fetchedData : []);
+        const allFlights = Array.isArray(fetchedData) ? fetchedData : [];
+
+        // Only display active, future scheduled flights
+        const now = new Date();
+        const futureFlights = allFlights.filter(
+          (flight) =>
+            flight.departureTime && new Date(flight.departureTime) > now,
+        );
+
+        setFlights(futureFlights);
       } catch (err) {
         console.error("Failed to load flights:", err);
         setErrorMsg(
@@ -121,26 +130,34 @@ const FlightCatalog = () => {
               return (
                 <div
                   key={flight._id}
-                  className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm hover:shadow-xl transition-all duration-300"
+                  onClick={() => {
+                    if (flight.availableSeats >= 1) {
+                      setSelectedFlightId(isBookingThis ? null : flight._id);
+                    }
+                  }}
+                  className={`bg-white rounded-3xl border p-8 shadow-sm transition-all duration-300 select-none ${
+                    flight.availableSeats < 1
+                      ? "opacity-70 border-gray-200 cursor-not-allowed"
+                      : isBookingThis
+                        ? "border-blue-500 ring-2 ring-blue-500/10 shadow-md cursor-pointer"
+                        : "border-gray-200 hover:border-blue-400 hover:shadow-xl cursor-pointer"
+                  }`}
                 >
-                  {/* Main Row Grid: 5 Columns for balanced spacing */}
-                  <div className="grid grid-cols-1 md:grid-cols-5 items-center gap-8">
-                    {/* Column 1: Airline & Flight Number */}
+                  {/* Main Row Grid: 5 Columns for balanced spacing aligned to the top */}
+                  <div className="grid grid-cols-1 md:grid-cols-5 items-start gap-8">
+                    {/* Flight Number */}
                     <div className="flex flex-col items-start justify-center gap-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                        {flight.airline || "Commercial"}
+                      <span className="text-[15px] text-gray-400 font-bold uppercase tracking-wider">
+                        Flight Number
                       </span>
                       <span className="text-3xl font-black text-slate-900 tracking-tighter mt-1">
                         {flight.flightNumber}
                       </span>
-                      <span className="inline-block mt-2 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-700 border border-green-200">
-                        {flight.status || "scheduled"}
-                      </span>
                     </div>
 
-                    {/* Column 2: Departure Time */}
+                    {/* Departure Time */}
                     <div className="flex flex-col items-center md:items-start border-l border-gray-100 pl-0 md:pl-6">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                      <span className="text-[15px] text-gray-400 font-bold uppercase tracking-wider">
                         Departure
                       </span>
                       <span className="text-3xl font-black text-slate-900 tracking-tight">
@@ -162,27 +179,30 @@ const FlightCatalog = () => {
                       </span>
                     </div>
 
-                    {/* Column 3: Route Graphic */}
+                    {/* Route Graphic */}
                     <div className="flex flex-col items-center justify-center">
+                      <span className="text-[12px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded mb-2">
+                        {flight.airline || "Commercial"}
+                      </span>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">
+                        <span className="font-bold text-[20px]">
                           {flight.departureAirport}
                         </span>
                         <span className="material-symbols-outlined text-blue-500">
                           arrow_right_alt
                         </span>
-                        <span className="font-bold text-lg">
+                        <span className="font-bold text-[20px]">
                           {flight.arrivalAirport}
                         </span>
                       </div>
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">
+                      <span className="text-[15px] text-gray-400 font-bold uppercase tracking-wider mt-1">
                         Direct Route
                       </span>
                     </div>
 
-                    {/* Column 4: Arrival Time */}
+                    {/* Arrival Time */}
                     <div className="flex flex-col items-center md:items-end">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                      <span className="text-[15px] text-gray-400 font-bold uppercase tracking-wider">
                         Arrival
                       </span>
                       <span className="text-3xl font-black text-slate-900 tracking-tight">
@@ -204,43 +224,36 @@ const FlightCatalog = () => {
                       </span>
                     </div>
 
-                    {/* Column 5: Price & Action */}
-                    <div className="flex flex-col items-center md:items-end gap-2 border-l border-gray-100 pl-0 md:pl-6">
-                      <div className="text-center md:text-right">
-                        <p
-                          className={`text-[15px] font-bold ${flight.availableSeats > 0 ? "text-blue-600" : "text-red-500"}`}
-                        >
-                          {flight.availableSeats} Seats Left
-                        </p>
-                        <p className="text-2xl font-black text-emerald-600">
+                    {/* Price & Action Info */}
+                    <div className="flex flex-col items-center md:items-end border-l border-gray-100 pl-0 md:pl-6 w-full">
+                      <span className="text-[15px] text-gray-400 font-bold uppercase tracking-wider">
+                        Fare & Seats
+                      </span>
+                      <div className="flex flex-col items-center md:items-end mt-1 w-full">
+                        <span className="text-3xl font-black text-emerald-600 tracking-tight">
                           ${flight.price?.toFixed(2)}
-                        </p>
+                        </span>
+                        <span
+                          className={`text-xs font-semibold mt-1 ${
+                            flight.availableSeats > 0
+                              ? "text-blue-600"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {flight.availableSeats > 0
+                            ? `${flight.availableSeats} Seats Left`
+                            : "Sold Out"}
+                        </span>
                       </div>
-                      <button
-                        onClick={() =>
-                          setSelectedFlightId(isBookingThis ? null : flight._id)
-                        }
-                        disabled={flight.availableSeats < 1}
-                        className={`w-full px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-sm ${
-                          flight.availableSeats < 1
-                            ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                            : isBookingThis
-                              ? "bg-slate-200 text-slate-700"
-                              : "bg-blue-600 text-white hover:bg-blue-700"
-                        }`}
-                      >
-                        {flight.availableSeats < 1
-                          ? "Sold Out"
-                          : isBookingThis
-                            ? "Close"
-                            : "Book Seats"}
-                      </button>
                     </div>
                   </div>
 
                   {/* Expandable Booking Drawer */}
                   {isBookingThis && (
-                    <div className="mt-8 pt-8 border-t border-gray-100 bg-gray-50/70 p-6 rounded-2xl space-y-6">
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-8 pt-8 border-t border-gray-100 bg-gray-50/70 p-6 rounded-2xl space-y-6"
+                    >
                       <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">
                         Configure Booking Allocation
                       </h4>

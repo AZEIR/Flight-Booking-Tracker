@@ -151,7 +151,12 @@ const updateBooking = async (req, res) => {
       booking.totalPrice = flight.price * newPassengers;
     }
 
-    if (adminPriceOverride != undefined) {
+    if (adminPriceOverride !== undefined) {
+      if (req.user.role !== "admin") {
+        return res
+          .status(403)
+          .json({ message: "Only administrators can override booking pricing." });
+      }
       booking.totalPrice = adminPriceOverride;
     }
 
