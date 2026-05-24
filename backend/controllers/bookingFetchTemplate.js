@@ -36,14 +36,16 @@ class AdminBookingFetcher extends BookingFetcher {
     async fetchData() {
         return await BookingRecord.find()
             .populate("user" , "name email")
-            .populate ("flight");
+            .populate ("flight")
+            .sort({ createdAt: -1 });
     }
 }
 
 class UserBookingFetcher extends BookingFetcher {
     async fetchData() {
         return await BookingRecord.find({ user: this.req.user._id })
-            .populate("flight");
+            .populate("flight")
+            .sort({ createdAt: -1 });
     }
 }
 
