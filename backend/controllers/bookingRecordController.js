@@ -1,28 +1,21 @@
 const BookingRecord = require("../models/BookingRecords");
 const AviationData = require("../models/AviationDatas");
 const User = require("../models/User");
+const { AdminBookingFetcher, UserBookingFetcher } = require("./bookingFetchTemplate");
 const crypto = require("crypto");
 
 // @route   GET /bookings
 const getBookings = async (req, res) => {
-  try {
-    let bookingRecords;
-    if (req.user.role === "admin") {
-      bookingRecords = await BookingRecord.find()
-        .populate("user", "name email")
-        .populate("flight");
-    } else {
-      bookingRecords = await BookingRecord.find({ user: req.user.id }).populate(
-        "flight",
-      );
-    }
-    res.status(200).json(bookingRecords);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to retrieve booking", error: error.message });
+  let fetcher;
+  if (req.user.role === "admin") {
+    fetcher = new AdminBookingFetcher(req, res);
   }
-};
+  else {
+    fetcher = new UserBookingFetcher(req, res);
+   }
+   await fetcher.execute();
+  };
+
 
 // @route   POST /bookings
 const createBooking = async (req, res) => {
