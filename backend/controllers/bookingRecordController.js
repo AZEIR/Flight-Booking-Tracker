@@ -3,6 +3,10 @@ const AviationData = require("../models/AviationDatas");
 const User = require("../models/User");
 const { AdminBookingFetcher, UserBookingFetcher } = require("./bookingFetchTemplate");
 const crypto = require("crypto");
+const {
+  BookingUpdateFacade,
+  BookingError,
+} = require("../facades/bookingUpdateFacade");
 
 // @route   GET /bookings
 const getBookings = async (req, res) => {
@@ -86,80 +90,24 @@ const createBooking = async (req, res) => {
 const updateBooking = async (req, res) => {
   const { newPassengers, adminPriceOverride } = req.body;
 
-  // validate newPassengers is more then 1 and is not undefined
-  if (newPassengers !== undefined && newPassengers < 1) {
-    return res
-      .status(400)
-      .json({ message: "Passenger count must be at least 1." });
-  }
   try {
-    const booking = await BookingRecord.findById(req.params.id);
-
-    // check if booking exist
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    // check ownership
-    if (booking.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Not authorised to modify this booking." });
-    }
-
-    // check if booking is cancelled
-    if (booking.bookingStatus === "cancelled") {
-      return res
-        .status(400)
-        .json({ message: "Cannot update a cancelled booking" });
-    }
-
-    const flight = await AviationData.findById(booking.flight);
-
-    // check if departure time is within 24hr
-    const hoursUntilDeparture =
-      (new Date(flight.departureTime) - new Date()) / (1000 * 60 * 60);
-    if (hoursUntilDeparture < 24 && req.user.role !== "admin") {
-      return res.status(400).json({
-        message: "Modifications are locked within 24 hours of departure.",
-      });
-    }
-
-    if (newPassengers && newPassengers !== booking.passengers) {
-      const passengerDifference = newPassengers - booking.passengers;
-
-      if (
-        passengerDifference > 0 &&
-        flight.availableSeats < passengerDifference
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Not enough extra seats available on this flight" });
-      }
-
-      flight.availableSeats = flight.availableSeats - passengerDifference;
-      await flight.save();
-
-      booking.passengers = newPassengers;
-      booking.totalPrice = flight.price * newPassengers;
-    }
-
-    if (adminPriceOverride !== undefined) {
-      if (req.user.role !== "admin") {
-        return res
-          .status(403)
-          .json({ message: "Only administrators can override booking pricing." });
-      }
-      booking.totalPrice = adminPriceOverride;
-    }
-
-    await booking.save();
+    const updatedBooking = await BookingUpdateFacade.updateBooking(
+      req.params.id,
+      { newPassengers, adminPriceOverride },
+      req.user,
+    );
 
     res.status(200).json({
       message: "Booking updated successfully",
-      booking: booking,
+      booking: updatedBooking,
     });
   } catch (error) {
+    if (error instanceof BookingError || error.statusCode) {
+      return res
+        .status(error.statusCode || 400)
+        .json({ message: error.message });
+    }
+
     res.status(500).json({
       message: "Server error while updating booking",
       error: error.message,
