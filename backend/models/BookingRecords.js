@@ -35,5 +35,10 @@ const bookingRecordSchema = new mongoose.Schema(
   },
   { timestamps: true, autoIndex: true },
 );
+
 bookingRecordSchema.index({ flightNumber: 1 }, { unique: false, sparse: true });
+
+bookingRecordSchema.methods.canBeModifiedBy = function (user) {
+  return this.user.toString() === user.id || user.role === "admin";
+};
 module.exports = mongoose.model("BookingRecord", bookingRecordSchema);

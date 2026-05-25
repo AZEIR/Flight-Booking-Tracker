@@ -13,7 +13,9 @@ const {
 const BaseController = require("./baseController");
 
 class BookingRecordController extends BaseController {
-  // Retrieve booking records (all bookings for admin, personal bookings for regular user)
+  /**
+   * Retrieve booking records (all bookings for admin, personal bookings for regular user)
+   */
   getBookings = async (req, res) => {
     let fetcher;
     if (req.user.role === "admin") {
@@ -24,8 +26,9 @@ class BookingRecordController extends BaseController {
     await fetcher.execute();
   };
 
-  //Create a new flight booking record and update remaining seat counts
-
+  /**
+   * Create a new flight booking record and update remaining seat counts
+   */
   createBooking = async (req, res) => {
     const { flightId, passengers, targetUserEmail } = req.body;
 
@@ -62,8 +65,14 @@ class BookingRecordController extends BaseController {
         return this.sendError(res, "Flight not found", null, 404);
       }
 
-      if (flight.availableSeats < passengers) {
-        return this.sendError(res, "Not enough seats available", null, 400);
+      // Encapsulated rich model validation check
+      if (!flight.hasAvailableSeats(passengers)) {
+        return this.sendError(
+          res,
+          "Not enough seats available",
+          null,
+          400,
+        );
       }
 
       const totalPrice = flight.price * passengers;
@@ -93,7 +102,9 @@ class BookingRecordController extends BaseController {
     }
   };
 
-  // Modify an existing booking record using the BookingUpdateFacade
+  /**
+   * Modify an existing booking record using the BookingUpdateFacade
+   */
   updateBooking = async (req, res) => {
     const { newPassengers, adminPriceOverride } = req.body;
 
@@ -123,7 +134,9 @@ class BookingRecordController extends BaseController {
     }
   };
 
-  // Cancel an active booking record and return seats back to flight capacity
+  /**
+   * Cancel an active booking record and return seats back to flight capacity
+   */
   cancelBooking = async (req, res) => {
     try {
       const booking = await BookingRecord.findById(req.params.id);
@@ -131,10 +144,8 @@ class BookingRecordController extends BaseController {
         return this.sendError(res, "Booking not found", null, 404);
       }
 
-      if (
-        booking.user.toString() !== req.user.id &&
-        req.user.role !== "admin"
-      ) {
+      // Encapsulated rich model validation check for user modify privileges
+      if (!booking.canBeModifiedBy(req.user)) {
         return this.sendError(
           res,
           "Not authorised to modify this booking.",
@@ -157,8 +168,8 @@ class BookingRecordController extends BaseController {
         );
       }
 
-      const hasDeparted = new Date() > new Date(flight.departureTime);
-      if (hasDeparted && req.user.role !== "admin") {
+      // Encapsulated rich model validation check for flight departure
+      if (flight.hasDeparted() && req.user.role !== "admin") {
         return this.sendError(
           res,
           "Cannot cancel a flight that has already departed.",

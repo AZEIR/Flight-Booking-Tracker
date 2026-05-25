@@ -47,4 +47,19 @@ const aviationDataSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Check if the flight has already departed
+aviationDataSchema.methods.hasDeparted = function () {
+  return new Date() > this.departureTime;
+};
+// Check if a flight is within the restricted 24-hour departure lockout window
+aviationDataSchema.methods.isLockedForModifications = function () {
+  const hoursUntilDeparture =
+    (new Date(this.departureTime) - new Date()) / (1000 * 60 * 60);
+  return hoursUntilDeparture < 24;
+};
+// Check if there are enough available seats
+aviationDataSchema.methods.hasAvailableSeats = function (requestedSeats) {
+  return this.availableSeats >= requestedSeats;
+};
+
 module.exports = mongoose.model("AviationData", aviationDataSchema);

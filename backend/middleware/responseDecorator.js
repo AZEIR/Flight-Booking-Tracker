@@ -1,8 +1,8 @@
 const responseDecorator = (req, res, next) => {
-  //1. Store the original res.json function to call later
+  // Store the original res.json function to call later
   const originalJson = res.json;
 
-  //2. Override the standard res.json function with new behaviour
+  // Override the standard res.json function with new behaviour
   res.json = function (body) {
     // If the response already has a 'success' property (matching the standard format), just pass it through
     if (body && Object.prototype.hasOwnProperty.call(body, "success")) {
@@ -12,12 +12,12 @@ const responseDecorator = (req, res, next) => {
     const statusCode = res.statusCode;
     const isSuccess = statusCode >= 200 && statusCode < 300;
 
-    //Build the decorated, staandard response format
+    // Build the decorated, staandard response format
     const decoratedResponse = {};
     decoratedResponse.success = isSuccess;
     decoratedResponse.timestamp = new Date().toISOString();
 
-    //look at which data properties are present in the original response body and use
+    // look at which data properties are present in the original response body and use
     if (isSuccess === true) {
       if (body && body.data) {
         decoratedResponse.data = body.data;
@@ -32,7 +32,7 @@ const responseDecorator = (req, res, next) => {
       decoratedResponse.data = null; // For error responses (isSuccess is false), set data to null
     }
 
-    //message field
+    // message field
     if (body && body.message) {
       decoratedResponse.message = body.message;
     } else {
@@ -52,7 +52,7 @@ const responseDecorator = (req, res, next) => {
       }
     }
 
-    // 3. Call the original res.json with the decorated response
+    // Call the original res.json with the decorated response
     return originalJson.call(this, decoratedResponse);
   };
 

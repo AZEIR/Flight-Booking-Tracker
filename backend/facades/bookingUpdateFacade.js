@@ -10,6 +10,7 @@ class BookingError extends Error {
 }
 
 class BookingUpdateFacade {
+  // Orchestrate complex business validations and update an existing booking record
   static async updateBooking(
     bookingId,
     { newPassengers, adminPriceOverride },
@@ -25,10 +26,8 @@ class BookingUpdateFacade {
       throw new BookingError("Booking not found", 404);
     }
 
-    if (
-      booking.user.toString() !== currentUser.id &&
-      currentUser.role !== "admin"
-    ) {
+    // Encapsulated model check for booking ownership/admin privileges
+    if (!booking.canBeModifiedBy(currentUser)) {
       throw new BookingError("Not authorised to modify this booking.", 403);
     }
 
@@ -38,10 +37,8 @@ class BookingUpdateFacade {
 
     const flight = await AviationData.findById(booking.flight);
 
-    const hoursUntilDeparture =
-      (new Date(flight.departureTime) - new Date()) / (1000 * 60 * 60);
-
-    if (hoursUntilDeparture < 24 && currentUser.role !== "admin") {
+    // Encapsulated model check for the restricted 24-hour departure lockout window
+    if (flight.isLockedForModifications() && currentUser.role !== "admin") {
       throw new BookingError(
         "Modifications are locked within 24 hours of departure.",
         400,
@@ -51,9 +48,10 @@ class BookingUpdateFacade {
     if (newPassengers && newPassengers !== booking.passengers) {
       const passengerDifference = newPassengers - booking.passengers;
 
+      // Encapsulated model check for seat availability
       if (
         passengerDifference > 0 &&
-        flight.availableSeats < passengerDifference
+        !flight.hasAvailableSeats(passengerDifference)
       ) {
         throw new BookingError(
           "Not enough extra seats available on this flight",
