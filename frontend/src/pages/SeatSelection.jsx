@@ -13,7 +13,7 @@ const SeatSelection = () => {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   useEffect(() => {
     if (!flightId || !passengers) {
@@ -54,32 +54,31 @@ const SeatSelection = () => {
     }
   };
 
-  const handleConfirmBooking = async () => {
+  const handleConfirmBooking = () => {
     if (selectedSeats.length !== passengers) {
       alert(`Please select exactly ${passengers} seat(s) before proceeding.`);
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const payload = {
-        flightId,
+    const payload = {
+      flightId,
+      passengers,
+      seats: selectedSeats,
+    };
+
+    if (targetUserEmail && targetUserEmail.trim() !== "") {
+      payload.targetUserEmail = targetUserEmail.trim().toLowerCase();
+    }
+
+    navigate("/checkout", {
+      state: {
+        payload,
+        flight,
         passengers,
         seats: selectedSeats,
-      };
-
-      if (targetUserEmail && targetUserEmail.trim() !== "") {
-        payload.targetUserEmail = targetUserEmail.trim().toLowerCase();
-      }
-
-      await axiosInstance.post("/bookings", payload);
-      alert("Reservation confirmed! Seats assigned successfully.");
-      navigate("/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to process booking.");
-    } finally {
-      setIsSubmitting(false);
-    }
+        totalPrice: (flight.price || 0) * passengers,
+      },
+    });
   };
 
   if (loading) {
@@ -384,18 +383,15 @@ const SeatSelection = () => {
               <div className="flex flex-col gap-3 pt-2">
                 <button
                   onClick={handleConfirmBooking}
-                  disabled={selectedSeats.length !== passengers || isSubmitting}
+                  disabled={selectedSeats.length !== passengers}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-2xl shadow-sm transition-all duration-200 text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting
-                    ? "Issuing Ledger Reservation..."
-                    : selectedSeats.length === passengers
-                      ? "Confirm Booking & Book"
-                      : `Select ${passengers - selectedSeats.length} More Seat(s)`}
+                  {selectedSeats.length === passengers
+                    ? "Proceed to Payment"
+                    : `Select ${passengers - selectedSeats.length} More Seat(s)`}
                 </button>
                 <button
                   onClick={() => navigate("/")}
-                  disabled={isSubmitting}
                   className="w-full bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-4 rounded-2xl transition-all duration-200 text-sm uppercase tracking-wider"
                 >
                   Abort Seating

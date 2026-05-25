@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import BookingRecords from "./pages/BookingRecords";
 import FlightCatalog from "./pages/FlightCatalog";
 import SeatSelection from "./pages/SeatSelection";
+import MockPayment from "./pages/MockPayment";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -31,6 +32,11 @@ function App() {
         <Route
           path="/select-seats"
           element={user ? <SeatSelection /> : <Navigate to="/login" />}
+        />
+
+        <Route
+          path="/checkout"
+          element={user ? <MockPayment /> : <Navigate to="/login" />}
         />
 
         <Route
