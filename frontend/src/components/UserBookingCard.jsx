@@ -62,7 +62,9 @@ const UserBookingCard = ({
   return (
     <div
       className={`flex flex-col bg-white border rounded-xl overflow-hidden transition-all duration-200 shadow-sm ${
-        isCancelled ? "opacity-80 border-red-100" : "border-gray-200 hover:shadow-md"
+        isCancelled
+          ? "opacity-80 border-red-100"
+          : "border-gray-200 hover:shadow-md"
       }`}
     >
       {/* Card Header - Tailored for Standard User */}
@@ -75,11 +77,6 @@ const UserBookingCard = ({
             #{booking.bookingReference}
           </span>
         </div>
-        {isCancelled && (
-          <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase bg-red-50 text-red-700 border border-red-200">
-            Cancelled
-          </span>
-        )}
       </div>
 
       {/* Card Body */}
@@ -100,9 +97,7 @@ const UserBookingCard = ({
         {/* Visual Pathway Ribbon */}
         <div className="flex flex-col flex-1 px-4 items-center justify-center">
           <div className="flex items-center w-full max-w-sm gap-3">
-            <div
-              className={`h-[2px] flex-1 rounded-full ${theme.line}`}
-            ></div>
+            <div className={`h-[2px] flex-1 rounded-full ${theme.line}`}></div>
 
             <span
               className={`material-symbols-outlined text-3xl ${theme.icon}`}
@@ -114,9 +109,7 @@ const UserBookingCard = ({
                   : "flight_takeoff"}
             </span>
 
-            <div
-              className={`h-[2px] flex-1 rounded-full ${theme.line}`}
-            ></div>
+            <div className={`h-[2px] flex-1 rounded-full ${theme.line}`}></div>
           </div>
 
           <span
@@ -181,7 +174,10 @@ const UserBookingCard = ({
               {/* Change Seat Selection */}
               <div className="w-1/3 flex flex-col justify-center">
                 <span className="text-xs text-gray-500 font-bold uppercase mb-1">
-                  Seats: {editForm.seats && editForm.seats.length > 0 ? editForm.seats.join(", ") : "None"}
+                  Seats:{" "}
+                  {editForm.seats && editForm.seats.length > 0
+                    ? editForm.seats.join(", ")
+                    : "None"}
                 </span>
                 <button
                   onClick={() =>
@@ -205,7 +201,8 @@ const UserBookingCard = ({
                 <span className="text-xl font-extrabold text-blue-600">
                   $
                   {(
-                    (booking.flight?.price || 0) * parseInt(editForm.paxCount, 10)
+                    (booking.flight?.price || 0) *
+                    parseInt(editForm.paxCount, 10)
                   ).toFixed(2)}
                 </span>
               </div>
@@ -234,7 +231,9 @@ const UserBookingCard = ({
                 <span className="text-xs text-gray-400 block font-bold uppercase">
                   Booked On
                 </span>
-                <span className="text-sm">{formatTimestamp(booking.createdAt)}</span>
+                <span className="text-sm">
+                  {formatTimestamp(booking.createdAt)}
+                </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">
@@ -247,7 +246,9 @@ const UserBookingCard = ({
                   Assigned Seats
                 </span>
                 <span className="font-mono font-bold text-blue-600">
-                  {booking.seats && booking.seats.length > 0 ? booking.seats.join(", ") : "None"}
+                  {booking.seats && booking.seats.length > 0
+                    ? booking.seats.join(", ")
+                    : "None"}
                 </span>
               </div>
               <div>
