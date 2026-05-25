@@ -7,13 +7,13 @@ const {
   updateBooking,
   cancelBooking,
 } = require("../controllers/bookingRecordController");
-const { protect } = require("../middleware/authMiddleware");
+const AuthMiddleware = require("../middleware/authMiddleware");
 const responseDecorator = require("../middleware/responseDecorator");
 
 router.use(responseDecorator);
 
-router.route("/").get(protect, getBookings).post(protect, createBooking);
-router.route("/:id").put(protect, updateBooking);
-router.route("/:id/cancel").patch(protect, cancelBooking);
+router.route("/").get(AuthMiddleware.protect, getBookings).post(AuthMiddleware.protect, createBooking);
+router.route("/:id").put(AuthMiddleware.protect, updateBooking);
+router.route("/:id/cancel").patch(AuthMiddleware.protect, cancelBooking);
 
 module.exports = router;

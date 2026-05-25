@@ -1,12 +1,6 @@
-// factories/userFactory.js
 const User = require("../models/User");
 
 class UserFactory {
-  /**
-   * Static method to create a user based on their role
-   * @param {string} role - The role of the user ('user' or 'admin')
-   * @param {Object} userData - The rest of the user details (name, email, password)
-   */
   static async createUser(role, userData) {
     const { name, email, password } = userData;
 
@@ -17,7 +11,7 @@ class UserFactory {
           name,
           email,
           password,
-          role: "admin"
+          role: "admin",
         });
 
       case "user":
@@ -26,10 +20,11 @@ class UserFactory {
           name,
           email,
           password,
-          role: "user"
+          role: "user",
         });
     }
   }
 }
 
 module.exports = UserFactory;
+

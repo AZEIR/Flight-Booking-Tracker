@@ -2,120 +2,145 @@ const User = require("../models/User");
 const UserFactory = require("../factories/userFactory");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const BaseController = require("./baseController");
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-};
+class AuthController extends BaseController {
+  // Generate a JWT token for a user session (expires in 30 days)
+  generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  };
 
-const registerUser = async (req, res) => {
-  const { name, email, password, role = "user" } = req.body;
-  try {
-    const userExists = await User.findOne({ email });
-    if (userExists)
-      return res.status(400).json({ message: "User already exists" });
+  // Register a new user or administrator and set authorization cookie
+  registerUser = async (req, res) => {
+    const { name, email, password, role = "user" } = req.body;
+    try {
+      const userExists = await User.findOne({ email });
+      if (userExists) {
+        return this.sendError(res, "User already exists", null, 400);
+      }
 
-    const user = await UserFactory.createUser(role, { name, email, password });
-    const token = generateToken(user.id);
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in ms
-    });
-
-    res.status(201).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const token = generateToken(user.id);
+      const user = await UserFactory.createUser(role, {
+        name,
+        email,
+        password,
+      });
+      const token = this.generateToken(user.id);
 
       res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // require HTTPS in production
+        secure: false,
         sameSite: "strict",
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in ms
       });
 
-      res.json({
-        message: "Login successful",
-        user: {
+      this.sendSuccess(
+        res,
+        {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
         },
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
+        "User registered successfully",
+        201,
+      );
+    } catch (error) {
+      this.sendError(res, error);
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  };
 
-const logoutUser = (req, res) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    expires: new Date(0), // set expiration to past date to delete
-  });
-  res.status(200).json({ message: "Logged out successfully " });
-};
+  // Authenticate user credentials and set user session cookie
+  loginUser = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (user && (await bcrypt.compare(password, user.password))) {
+        const token = this.generateToken(user.id);
 
-const getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production", // require HTTPS in production
+          sameSite: "strict",
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in ms
+        });
+
+        this.sendSuccess(
+          res,
+          {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+          "Login successful",
+        );
+      } else {
+        this.sendError(res, "Invalid email or password", null, 401);
+      }
+    } catch (error) {
+      this.sendError(res, error);
     }
+  };
 
-    res.status(200).json({
-      role: user.role,
-      name: user.name,
-      email: user.email,
+  // Clear user authorization cookie to log out user
+  logoutUser = (req, res) => {
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0), // set expiration to past date to delete
     });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
+    this.sendSuccess(res, null, "Logged out successfully");
+  };
 
-const updateUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+  // Retrieve the current authenticated user's profile details
+  getProfile = async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return this.sendError(res, "User not found", null, 404);
+      }
 
-    const { name, email } = req.body;
-    user.name = name || user.name;
-    user.email = email || user.email;
+      this.sendSuccess(
+        res,
+        {
+          role: user.role,
+          name: user.name,
+          email: user.email,
+        },
+        "Profile retrieved successfully",
+      );
+    } catch (error) {
+      this.sendError(res, error, "Server error");
+    }
+  };
 
-    const updatedUser = await user.save();
-    res.json({
-      id: updatedUser.id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      token: generateToken(updatedUser.id),
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  // Update the current user's profile name and email address
 
-module.exports = {
-  registerUser,
-  loginUser,
-  logoutUser,
-  updateUserProfile,
-  getProfile,
-};
+  updateUserProfile = async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return this.sendError(res, "User not found", null, 404);
+      }
+
+      const { name, email } = req.body;
+      user.name = name || user.name;
+      user.email = email || user.email;
+
+      const updatedUser = await user.save();
+      this.sendSuccess(
+        res,
+        {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          token: this.generateToken(updatedUser.id),
+        },
+        "Profile updated successfully",
+      );
+    } catch (error) {
+      this.sendError(res, error);
+    }
+  };
+}
+
+module.exports = new AuthController();
