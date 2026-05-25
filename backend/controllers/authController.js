@@ -40,6 +40,7 @@ class AuthController extends BaseController {
           name: user.name,
           email: user.email,
           role: user.role,
+          token: token,
         },
         "User registered successfully",
         201,
@@ -52,8 +53,14 @@ class AuthController extends BaseController {
   // Authenticate user credentials and set user session cookie
   loginUser = async (req, res) => {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return this.sendError(res, "Email and password are required", null, 400);
+    }
+
     try {
       const user = await User.findOne({ email });
+
       if (user && (await bcrypt.compare(password, user.password))) {
         const token = this.generateToken(user.id);
 
@@ -71,6 +78,7 @@ class AuthController extends BaseController {
             name: user.name,
             email: user.email,
             role: user.role,
+            token: token,
           },
           "Login successful",
         );

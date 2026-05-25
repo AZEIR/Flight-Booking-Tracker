@@ -1,4 +1,3 @@
-// src/axiosConfig.jsx
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -10,4 +9,17 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Automatically adds the saved JWT token to the headers of all outgoing API requests.
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token"); // Or retrieve from your global Auth state
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 export default axiosInstance;
