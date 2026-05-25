@@ -13,9 +13,7 @@ const {
 const BaseController = require("./baseController");
 
 class BookingRecordController extends BaseController {
-  /**
-   * Retrieve booking records (all bookings for admin, personal bookings for regular user)
-   */
+  // Retrieve booking records (all bookings for admin, personal bookings for regular user)
   getBookings = async (req, res) => {
     let fetcher;
     if (req.user.role === "admin") {
@@ -26,9 +24,7 @@ class BookingRecordController extends BaseController {
     await fetcher.execute();
   };
 
-  /**
-   * Create a new flight booking record and update remaining seat counts
-   */
+  // Create a new flight booking record and update remaining seat counts
   createBooking = async (req, res) => {
     const { flightId, passengers, targetUserEmail } = req.body;
 
@@ -67,12 +63,7 @@ class BookingRecordController extends BaseController {
 
       // Encapsulated rich model validation check
       if (!flight.hasAvailableSeats(passengers)) {
-        return this.sendError(
-          res,
-          "Not enough seats available",
-          null,
-          400,
-        );
+        return this.sendError(res, "Not enough seats available", null, 400);
       }
 
       const totalPrice = flight.price * passengers;
@@ -102,9 +93,7 @@ class BookingRecordController extends BaseController {
     }
   };
 
-  /**
-   * Modify an existing booking record using the BookingUpdateFacade
-   */
+  // Modify an existing booking record using the BookingUpdateFacade
   updateBooking = async (req, res) => {
     const { newPassengers, adminPriceOverride } = req.body;
 
@@ -134,9 +123,7 @@ class BookingRecordController extends BaseController {
     }
   };
 
-  /**
-   * Cancel an active booking record and return seats back to flight capacity
-   */
+  // Cancel an active booking record and return seats back to flight capacity
   cancelBooking = async (req, res) => {
     try {
       const booking = await BookingRecord.findById(req.params.id);
