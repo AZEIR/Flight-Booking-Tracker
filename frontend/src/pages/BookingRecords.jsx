@@ -3,6 +3,7 @@ import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
 import AdminBookingCard from "../components/AdminBookingCard";
 import UserBookingCard from "../components/UserBookingCard";
+import SeatSelectionModal from "../components/SeatSelectionModal";
 
 const BookingRecords = () => {
   const { user } = useAuth();
@@ -13,10 +14,14 @@ const BookingRecords = () => {
   const [editForm, setEditForm] = useState({
     paxCount: "1",
     priceOverride: "",
+    seats: [],
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+
+  // Seat Selection Modal State
+  const [isSeatModalOpen, setIsSeatModalOpen] = useState(false);
+  const [seatModalConfig, setSeatModalConfig] = useState(null);
 
   useEffect(() => {
     fetchBookings();
@@ -30,7 +35,7 @@ const BookingRecords = () => {
       setBookings(Array.isArray(fetchedBookings) ? fetchedBookings : []);
     } catch (error) {
       console.error("Failed to fetch records:", error);
-      setErrorMsg(
+      alert(
         "Failed to synchronize with the database. Please ensure you are logged in.",
       );
     } finally {
@@ -43,14 +48,25 @@ const BookingRecords = () => {
     setEditForm({
       paxCount: booking.passengers?.toString() || "1",
       priceOverride: booking.totalPrice?.toString() || "0",
+      seats: booking.seats || [],
     });
-    setErrorMsg("");
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditForm({ paxCount: "1", priceOverride: "" });
-    setErrorMsg("");
+    setEditForm({ paxCount: "1", priceOverride: "", seats: [] });
+  };
+
+  const openSeatModal = (flightId, passengers, initialSeats) => {
+    setSeatModalConfig({ flightId, passengers, initialSeats });
+    setIsSeatModalOpen(true);
+  };
+
+  const handleSeatModalConfirm = (selectedSeats) => {
+    setEditForm((prev) => ({
+      ...prev,
+      seats: selectedSeats,
+    }));
   };
 
   const handleSaveRecord = async (bookingId) => {
@@ -59,14 +75,21 @@ const BookingRecords = () => {
       isAdmin &&
       (!editForm.priceOverride || parseFloat(editForm.priceOverride) <= 0)
     ) {
-      setErrorMsg("Please enter a valid price amount.");
+      alert("Please enter a valid price amount.");
       return;
     }
+
+    const paxCountNum = parseInt(editForm.paxCount, 10);
+    if (editForm.seats.length !== paxCountNum) {
+      alert(`Please select exactly ${paxCountNum} seat(s) before saving.`);
+      return;
+    }
+
     setIsSubmitting(true);
-    setErrorMsg("");
     try {
       const payload = {
-        newPassengers: parseInt(editForm.paxCount, 10),
+        newPassengers: paxCountNum,
+        newSeats: editForm.seats,
       };
       if (isAdmin) {
         payload.adminPriceOverride = parseFloat(editForm.priceOverride);
@@ -75,7 +98,7 @@ const BookingRecords = () => {
       await fetchBookings();
       setEditingId(null);
     } catch (error) {
-      setErrorMsg(
+      alert(
         error.response?.data?.message ||
           "An error occurred during transaction.",
       );
@@ -112,14 +135,6 @@ const BookingRecords = () => {
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
             Booking Management System Dashboard
           </h2>
-          {errorMsg && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-xl flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px]">
-                error
-              </span>
-              {errorMsg}
-            </div>
-          )}
         </div>
 
         <section className="space-y-6">
@@ -143,6 +158,7 @@ const BookingRecords = () => {
                     onCancelEdit={cancelEdit}
                     onSave={() => handleSaveRecord(booking._id)}
                     onCancelBooking={() => handleCancelBooking(booking._id)}
+                    onOpenSeatModal={openSeatModal}
                     isSubmitting={isSubmitting}
                   />
                 );
@@ -158,6 +174,7 @@ const BookingRecords = () => {
                     onCancelEdit={cancelEdit}
                     onSave={() => handleSaveRecord(booking._id)}
                     onCancelBooking={() => handleCancelBooking(booking._id)}
+                    onOpenSeatModal={openSeatModal}
                     isSubmitting={isSubmitting}
                   />
                 );
@@ -166,6 +183,17 @@ const BookingRecords = () => {
           )}
         </section>
       </main>
+
+      {seatModalConfig && (
+        <SeatSelectionModal
+          isOpen={isSeatModalOpen}
+          onClose={() => setIsSeatModalOpen(false)}
+          flightId={seatModalConfig.flightId}
+          passengers={seatModalConfig.passengers}
+          initialSeats={seatModalConfig.initialSeats}
+          onConfirm={handleSeatModalConfirm}
+        />
+      )}
     </div>
   );
 };

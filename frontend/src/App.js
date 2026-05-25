@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import BookingRecords from "./pages/BookingRecords";
 import FlightCatalog from "./pages/FlightCatalog";
+import SeatSelection from "./pages/SeatSelection";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
@@ -26,6 +27,11 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<FlightCatalog />} />
+
+        <Route
+          path="/select-seats"
+          element={user ? <SeatSelection /> : <Navigate to="/login" />}
+        />
 
         <Route
           path="/dashboard"

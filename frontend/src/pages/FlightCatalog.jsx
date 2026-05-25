@@ -16,7 +16,6 @@ const FlightCatalog = () => {
     passengers: 1,
     targetUserEmail: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchAvailableFlights = async () => {
@@ -47,7 +46,7 @@ const FlightCatalog = () => {
     fetchAvailableFlights();
   }, []);
 
-  const handleConfirmBooking = async (flightId) => {
+  const handleConfirmBooking = (flightId) => {
     if (!user) {
       alert("Please login or register an account to book a flight.");
       navigate("/login");
@@ -59,33 +58,14 @@ const FlightCatalog = () => {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const payload = {
+    navigate("/select-seats", {
+      state: {
         flightId,
         passengers: parseInt(bookingPayload.passengers, 10),
-      };
-
-      if (
-        user.role === "admin" &&
-        bookingPayload.targetUserEmail.trim() !== ""
-      ) {
-        payload.targetUserEmail = bookingPayload.targetUserEmail
-          .trim()
-          .toLowerCase();
-      }
-
-      await axiosInstance.post("/bookings", payload);
-      alert("Booking created successfully within ledger system!");
-
-      setSelectedFlightId(null);
-      setBookingPayload({ passengers: 1, targetUserEmail: "" });
-      navigate("/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to issue booking entry.");
-    } finally {
-      setIsSubmitting(false);
-    }
+        targetUserEmail:
+          user.role === "admin" ? bookingPayload.targetUserEmail : "",
+      },
+    });
   };
 
   if (isLoading) {
@@ -261,24 +241,27 @@ const FlightCatalog = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex flex-col">
                           <label className="text-xs text-gray-500 font-bold uppercase mb-2">
-                            Number of Tickets
+                            Number of Passengers
                           </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max={flight.availableSeats}
+                          <select
                             value={bookingPayload.passengers}
                             onChange={(e) =>
                               setBookingPayload({
                                 ...bookingPayload,
-                                passengers: Math.max(
-                                  1,
-                                  parseInt(e.target.value, 10) || 1,
-                                ),
+                                passengers: parseInt(e.target.value, 10),
                               })
                             }
-                            className="p-3 border border-gray-300 bg-white rounded-xl text-base font-semibold text-gray-900 outline-none focus:border-blue-500"
-                          />
+                            className="p-3 border border-gray-300 bg-white rounded-xl text-base font-semibold text-gray-900 outline-none focus:border-blue-500 w-full"
+                          >
+                            {Array.from(
+                              { length: Math.min(6, flight.availableSeats) },
+                              (_, i) => i + 1,
+                            ).map((num) => (
+                              <option key={num} value={num}>
+                                {num} Passenger {num > 1 ? "s" : ""}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         {user?.role === "admin" && (
@@ -317,12 +300,11 @@ const FlightCatalog = () => {
                         <button
                           onClick={() => handleConfirmBooking(flight._id)}
                           disabled={
-                            isSubmitting ||
                             flight.availableSeats < bookingPayload.passengers
                           }
                           className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-10 rounded-2xl shadow-sm transition-all text-sm uppercase tracking-wider"
                         >
-                          {isSubmitting ? "Processing..." : "Confirm Booking"}
+                          Confirm Booking
                         </button>
                       </div>
                     </div>

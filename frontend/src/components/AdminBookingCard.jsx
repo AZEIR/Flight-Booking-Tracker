@@ -15,6 +15,7 @@ const AdminBookingCard = ({
   onCancelEdit,
   onSave,
   onCancelBooking,
+  onOpenSeatModal,
   isSubmitting,
 }) => {
   const isCancelled = booking.bookingStatus === "cancelled";
@@ -164,7 +165,7 @@ const AdminBookingCard = ({
         {isEditing ? (
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-1 gap-6 w-full">
-              <div className="w-1/2">
+              <div className="w-1/3">
                 <label className="text-xs text-gray-500 font-bold uppercase">
                   Passengers
                 </label>
@@ -177,6 +178,7 @@ const AdminBookingCard = ({
                       ...editForm,
                       paxCount: e.target.value,
                       priceOverride: (flightPrice * newPaxCount).toString(),
+                      seats: editForm.seats.slice(0, newPaxCount),
                     });
                   }}
                   className="bg-white border rounded-xl px-3 py-2 w-full text-base font-medium outline-none focus:border-blue-500"
@@ -188,7 +190,27 @@ const AdminBookingCard = ({
                   ))}
                 </select>
               </div>
-              <div className="w-1/2">
+
+              {/* Change Seat Selection */}
+              <div className="w-1/3 flex flex-col justify-center">
+                <span className="text-xs text-gray-500 font-bold uppercase mb-1">
+                  Seats: {editForm.seats && editForm.seats.length > 0 ? editForm.seats.join(", ") : "None"}
+                </span>
+                <button
+                  onClick={() =>
+                    onOpenSeatModal(
+                      booking.flight?._id,
+                      parseInt(editForm.paxCount, 10),
+                      editForm.seats,
+                    )
+                  }
+                  className="px-3 py-2 border border-blue-200 text-blue-600 rounded-xl bg-white hover:bg-blue-50 font-bold text-xs transition-colors w-full"
+                >
+                  Select / Change Seats
+                </button>
+              </div>
+
+              <div className="w-1/3">
                 <label className="text-xs text-gray-500 font-bold uppercase">
                   Total Price ($)
                 </label>
@@ -224,7 +246,8 @@ const AdminBookingCard = ({
           </div>
         ) : (
           <div className="flex flex-col md:flex-row justify-between items-center w-full">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1">
+            {/* 5 Columns: Assigned Seats Added */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 flex-1">
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">
                   Ref Code
@@ -246,6 +269,14 @@ const AdminBookingCard = ({
                   Passengers
                 </span>
                 <span className="font-bold">{booking.passengers} Pax</span>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400 block font-bold uppercase">
+                  Assigned Seats
+                </span>
+                <span className="font-mono font-bold text-blue-600">
+                  {booking.seats && booking.seats.length > 0 ? booking.seats.join(", ") : "None"}
+                </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">

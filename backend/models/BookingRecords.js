@@ -23,6 +23,11 @@ const bookingRecordSchema = new mongoose.Schema(
       required: true,
       default: 1,
     },
+    seats: {
+      type: [String],
+      required: true,
+      default: [],
+    },
     totalPrice: {
       type: Number,
       required: true,
