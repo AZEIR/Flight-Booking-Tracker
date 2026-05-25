@@ -1,7 +1,183 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../axiosConfig";
+
+// search & filter Bar component
+const SearchFilterBar = ({ filters, onChange, onReset, flights }) => {
+  // fetch airlines from loaded flights dynamically
+  const airlines = useMemo(() => {
+    const set = new Set(flights.map((f) => f.airline).filter(Boolean));
+    return ["All Airlines", ...Array.from(set).sort()];
+  }, [flights]);
+
+  // fetch airports for dropdowns dynamically
+  const airports = useMemo(() => {
+    const set = new Set([
+      ...flights.map((f) => f.departureAirport),
+      ...flights.map((f) => f.arrivalAirport),
+    ]);
+    return ["Any", ...Array.from(set).sort()];
+  }, [flights]);
+
+  const hasActiveFilters =
+    filters.search ||
+    filters.from !== "Any" ||
+    filters.to !== "Any" ||
+    filters.airline !== "All Airlines" ||
+    filters.timeOfDay !== "Any Time" ||
+    filters.sortBy !== "Default";
+
+  return (
+    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-4">
+      {/* filter title + clear search row */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xs font-black uppercase tracking-widest text-gray-400">
+          Filter
+        </h2>
+        {hasActiveFilters && (
+          <button
+            onClick={onReset}
+            className="text-xs text-red-500 font-bold hover:text-red-700 transition flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-sm">close</span>
+            Clear filters
+          </button>
+        )}
+      </div>
+
+      {/* search bar row */}
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl pointer-events-none">
+          search
+        </span>
+        <input
+          type="text"
+          placeholder="Search by flight number or airline…"
+          value={filters.search}
+          onChange={(e) => onChange("search", e.target.value)}
+          className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition"
+        />
+      </div>
+
+      {/* From and To filter section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* From filter */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 pl-1">
+            From
+          </label>
+          <select
+            value={filters.from}
+            onChange={(e) => onChange("from", e.target.value)}
+            className="p-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 bg-white cursor-pointer"
+          >
+            {airports.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* To filter */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 pl-1">
+            To
+          </label>
+          <select
+            value={filters.to}
+            onChange={(e) => onChange("to", e.target.value)}
+            className="p-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 bg-white cursor-pointer"
+          >
+            {airports.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Third filter row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Airline filter */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 pl-1">
+            Airline
+          </label>
+          <select
+            value={filters.airline}
+            onChange={(e) => onChange("airline", e.target.value)}
+            className="p-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 bg-white cursor-pointer"
+          >
+            {airlines.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Departure Time filter */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 pl-1">
+            Departure Time
+          </label>
+          <select
+            value={filters.timeOfDay}
+            onChange={(e) => onChange("timeOfDay", e.target.value)}
+            className="p-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 bg-white cursor-pointer"
+          >
+            <option value="Any Time">Any Time</option>
+            <option value="Morning">Morning (6am – 12pm)</option>
+            <option value="Afternoon">Afternoon (12pm – 6pm)</option>
+            <option value="Evening">Evening (6pm – 12am)</option>
+            <option value="Red-eye">Red-eye (12am – 6am)</option>
+          </select>
+        </div>
+
+        {/* Sort by filter */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 pl-1">
+            Sort By
+          </label>
+          <select
+            value={filters.sortBy}
+            onChange={(e) => onChange("sortBy", e.target.value)}
+            className="p-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 bg-white cursor-pointer"
+          >
+            <option value="Default">Default</option>
+            <option value="Cheapest">Cheapest</option>
+            <option value="Expensive">Most Expensive</option>
+            <option value="Shortest">Quickest Flight</option>
+            <option value="Seats">Most Seats Available</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Flight results count */}
+      <div className="pt-1">
+        <p className="text-xs text-gray-400 font-semibold">
+          Showing{" "}
+          <span className="text-blue-600 font-bold">{filters.resultCount}</span>{" "}
+          flight{filters.resultCount !== 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// default filters
+const DEFAULT_FILTERS = {
+  search: "",
+  from: "Any",
+  to: "Any",
+  airline: "All Airlines",
+  timeOfDay: "Any Time",
+  sortBy: "Default",
+  resultCount: 0,
+};
 
 const FlightCatalog = () => {
   const { user } = useAuth();
@@ -16,7 +192,9 @@ const FlightCatalog = () => {
     passengers: 1,
     targetUserEmail: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // filter state
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   useEffect(() => {
     const fetchAvailableFlights = async () => {
@@ -47,7 +225,94 @@ const FlightCatalog = () => {
     fetchAvailableFlights();
   }, []);
 
-  const handleConfirmBooking = async (flightId) => {
+  // apply filters client-side
+  const filteredFlights = useMemo(() => {
+    let results = [...flights];
+
+    // searchbar: flight number or airline
+    if (filters.search.trim()) {
+      const term = filters.search.trim().toLowerCase();
+      results = results.filter(
+        (f) =>
+          f.flightNumber?.toLowerCase().includes(term) ||
+          f.airline?.toLowerCase().includes(term),
+      );
+    }
+
+    // From which airport filter
+    if (filters.from !== "Any") {
+      results = results.filter((f) => f.departureAirport === filters.from);
+    }
+
+    // To which airport filter
+    if (filters.to !== "Any") {
+      results = results.filter((f) => f.arrivalAirport === filters.to);
+    }
+
+    // Specific Airline filter
+    if (filters.airline !== "All Airlines") {
+      results = results.filter((f) => f.airline === filters.airline);
+    }
+
+    // Time of day of flight
+    if (filters.timeOfDay !== "Any Time") {
+      results = results.filter((f) => {
+        if (!f.departureTime) return false;
+        const hour = new Date(f.departureTime).getHours();
+        switch (filters.timeOfDay) {
+          case "Morning":
+            return hour >= 6 && hour < 12;
+          case "Afternoon":
+            return hour >= 12 && hour < 18;
+          case "Evening":
+            return hour >= 18 && hour < 24;
+          case "Red-eye":
+            return hour >= 0 && hour < 6;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort-by
+    if (filters.sortBy !== "Default") {
+      results = [...results].sort((a, b) => {
+        switch (filters.sortBy) {
+          case "Cheapest":
+            return (a.price || 0) - (b.price || 0);
+          case "Expensive":
+            return (b.price || 0) - (a.price || 0);
+          case "Shortest": {
+            const durA = new Date(a.arrivalTime) - new Date(a.departureTime);
+            const durB = new Date(b.arrivalTime) - new Date(b.departureTime);
+            return durA - durB;
+          }
+          case "Seats":
+            return (b.availableSeats || 0) - (a.availableSeats || 0);
+          default:
+            return 0;
+        }
+      });
+    }
+    return results;
+  }, [flights, filters]);
+
+  // Keep result count in sync
+  useEffect(() => {
+    setFilters((prev) => ({ ...prev, resultCount: filteredFlights.length }));
+  }, [filteredFlights.length]);
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setSelectedFlightId(null);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({ ...DEFAULT_FILTERS, resultCount: flights.length });
+    setSelectedFlightId(null);
+  };
+
+  const handleConfirmBooking = (flightId) => {
     if (!user) {
       alert("Please login or register an account to book a flight.");
       navigate("/login");
@@ -59,33 +324,14 @@ const FlightCatalog = () => {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const payload = {
+    navigate("/select-seats", {
+      state: {
         flightId,
         passengers: parseInt(bookingPayload.passengers, 10),
-      };
-
-      if (
-        user.role === "admin" &&
-        bookingPayload.targetUserEmail.trim() !== ""
-      ) {
-        payload.targetUserEmail = bookingPayload.targetUserEmail
-          .trim()
-          .toLowerCase();
-      }
-
-      await axiosInstance.post("/bookings", payload);
-      alert("Booking created successfully within ledger system!");
-
-      setSelectedFlightId(null);
-      setBookingPayload({ passengers: 1, targetUserEmail: "" });
-      navigate("/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to issue booking entry.");
-    } finally {
-      setIsSubmitting(false);
-    }
+        targetUserEmail:
+          user.role === "admin" ? bookingPayload.targetUserEmail : "",
+      },
+    });
   };
 
   if (isLoading) {
@@ -117,14 +363,34 @@ const FlightCatalog = () => {
           )}
         </div>
 
+        {/* ── Search & Filter Bar ── */}
+        <SearchFilterBar
+          filters={filters}
+          onChange={handleFilterChange}
+          onReset={handleResetFilters}
+          flights={flights}
+        />
+
         {/* Flight List Container */}
         <div className="space-y-8">
-          {flights.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-3xl border shadow-sm text-gray-500 font-medium">
-              No flights are currently configured in the scheduling database.
+          {filteredFlights.length === 0 ? (
+            <div className="bg-white p-12 text-center rounded-3xl border shadow-sm space-y-3">
+              <p className="text-gray-500 font-medium">
+                {flights.length === 0
+                  ? "No flights are currently configured in the scheduling database."
+                  : "No flights match your search criteria."}
+              </p>
+              {flights.length > 0 && (
+                <button
+                  onClick={handleResetFilters}
+                  className="text-sm text-blue-600 font-bold hover:underline"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
-            flights.map((flight) => {
+            filteredFlights.map((flight) => {
               const isBookingThis = selectedFlightId === flight._id;
 
               return (
@@ -143,7 +409,7 @@ const FlightCatalog = () => {
                         : "border-gray-200 hover:border-blue-400 hover:shadow-xl cursor-pointer"
                   }`}
                 >
-                  {/* Main Row Grid: 5 Columns for balanced spacing aligned to the top */}
+                  {/* Main Row Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-5 items-start gap-8">
                     {/* Flight Number */}
                     <div className="flex flex-col items-start justify-center gap-1">
@@ -153,6 +419,20 @@ const FlightCatalog = () => {
                       <span className="text-3xl font-black text-slate-900 tracking-tighter mt-1">
                         {flight.flightNumber}
                       </span>
+                      {/* Status badge */}
+                      {flight.status && flight.status !== "scheduled" && (
+                        <span
+                          className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mt-1 ${
+                            flight.status === "delayed"
+                              ? "bg-amber-100 text-amber-700"
+                              : flight.status === "cancelled"
+                                ? "bg-red-100 text-red-600"
+                                : "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {flight.status}
+                        </span>
+                      )}
                     </div>
 
                     {/* Departure Time */}
@@ -224,7 +504,7 @@ const FlightCatalog = () => {
                       </span>
                     </div>
 
-                    {/* Price & Action Info */}
+                    {/* Price & Seats */}
                     <div className="flex flex-col items-center md:items-end border-l border-gray-100 pl-0 md:pl-6 w-full">
                       <span className="text-[15px] text-gray-400 font-bold uppercase tracking-wider">
                         Fare & Seats
@@ -261,24 +541,27 @@ const FlightCatalog = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex flex-col">
                           <label className="text-xs text-gray-500 font-bold uppercase mb-2">
-                            Number of Tickets
+                            Number of Passengers
                           </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max={flight.availableSeats}
+                          <select
                             value={bookingPayload.passengers}
                             onChange={(e) =>
                               setBookingPayload({
                                 ...bookingPayload,
-                                passengers: Math.max(
-                                  1,
-                                  parseInt(e.target.value, 10) || 1,
-                                ),
+                                passengers: parseInt(e.target.value, 10),
                               })
                             }
-                            className="p-3 border border-gray-300 bg-white rounded-xl text-base font-semibold text-gray-900 outline-none focus:border-blue-500"
-                          />
+                            className="p-3 border border-gray-300 bg-white rounded-xl text-base font-semibold text-gray-900 outline-none focus:border-blue-500 w-full"
+                          >
+                            {Array.from(
+                              { length: Math.min(6, flight.availableSeats) },
+                              (_, i) => i + 1,
+                            ).map((num) => (
+                              <option key={num} value={num}>
+                                {num} Passenger{num > 1 ? "s" : ""}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         {user?.role === "admin" && (
@@ -317,12 +600,11 @@ const FlightCatalog = () => {
                         <button
                           onClick={() => handleConfirmBooking(flight._id)}
                           disabled={
-                            isSubmitting ||
                             flight.availableSeats < bookingPayload.passengers
                           }
                           className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-10 rounded-2xl shadow-sm transition-all text-sm uppercase tracking-wider"
                         >
-                          {isSubmitting ? "Processing..." : "Confirm Booking"}
+                          Confirm Booking
                         </button>
                       </div>
                     </div>

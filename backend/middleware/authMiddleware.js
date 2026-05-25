@@ -4,7 +4,19 @@ const User = require("../models/User");
 class AuthMiddleware {
   // Protect routes by validating JWT session tokens stored in cookies
   static protect = async (req, res, next) => {
-    let token = req.cookies?.token;
+    let token;
+
+    // Primary Check: Look for Token in the Authorization Header
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer ")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    // Backup Check: Fallback to the Cookie if no header is present
+    else if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
 
     if (!token) {
       return res

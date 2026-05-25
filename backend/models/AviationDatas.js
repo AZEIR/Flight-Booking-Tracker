@@ -38,6 +38,10 @@ const aviationDataSchema = new mongoose.Schema(
       required: true,
       default: 150,
     },
+    bookedSeats: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
       enum: ["scheduled", "delayed", "cancelled", "completed"],

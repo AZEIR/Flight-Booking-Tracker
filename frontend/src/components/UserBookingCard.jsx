@@ -15,6 +15,7 @@ const UserBookingCard = ({
   onCancelEdit,
   onSave,
   onCancelBooking,
+  onOpenSeatModal,
   isSubmitting,
 }) => {
   const isCancelled = booking.bookingStatus === "cancelled";
@@ -61,7 +62,9 @@ const UserBookingCard = ({
   return (
     <div
       className={`flex flex-col bg-white border rounded-xl overflow-hidden transition-all duration-200 shadow-sm ${
-        isCancelled ? "opacity-80 border-red-100" : "border-gray-200 hover:shadow-md"
+        isCancelled
+          ? "opacity-80 border-red-100"
+          : "border-gray-200 hover:shadow-md"
       }`}
     >
       {/* Card Header - Tailored for Standard User */}
@@ -74,11 +77,6 @@ const UserBookingCard = ({
             #{booking.bookingReference}
           </span>
         </div>
-        {isCancelled && (
-          <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase bg-red-50 text-red-700 border border-red-200">
-            Cancelled
-          </span>
-        )}
       </div>
 
       {/* Card Body */}
@@ -99,9 +97,7 @@ const UserBookingCard = ({
         {/* Visual Pathway Ribbon */}
         <div className="flex flex-col flex-1 px-4 items-center justify-center">
           <div className="flex items-center w-full max-w-sm gap-3">
-            <div
-              className={`h-[2px] flex-1 rounded-full ${theme.line}`}
-            ></div>
+            <div className={`h-[2px] flex-1 rounded-full ${theme.line}`}></div>
 
             <span
               className={`material-symbols-outlined text-3xl ${theme.icon}`}
@@ -113,9 +109,7 @@ const UserBookingCard = ({
                   : "flight_takeoff"}
             </span>
 
-            <div
-              className={`h-[2px] flex-1 rounded-full ${theme.line}`}
-            ></div>
+            <div className={`h-[2px] flex-1 rounded-full ${theme.line}`}></div>
           </div>
 
           <span
@@ -152,18 +146,21 @@ const UserBookingCard = ({
         {isEditing ? (
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-1 gap-6 w-full">
-              <div className="w-1/2">
+              <div className="w-1/3">
                 <label className="text-xs text-gray-500 font-bold uppercase">
                   Passengers
                 </label>
                 <select
                   value={editForm.paxCount}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const newPaxCount = parseInt(e.target.value, 10);
+                    // Clear seats if passenger count changed, forcing them to re-select
                     setEditForm({
                       ...editForm,
                       paxCount: e.target.value,
-                    })
-                  }
+                      seats: editForm.seats.slice(0, newPaxCount),
+                    });
+                  }}
                   className="bg-white border rounded-xl px-3 py-2 w-full text-base font-medium outline-none focus:border-blue-500"
                 >
                   {[1, 2, 3, 4, 5, 6].map((num) => (
@@ -173,15 +170,39 @@ const UserBookingCard = ({
                   ))}
                 </select>
               </div>
-              {/* Read-Only Price Preview for Standard User */}
-              <div className="w-1/2 flex flex-col justify-center">
+
+              {/* Change Seat Selection */}
+              <div className="w-1/3 flex flex-col justify-center">
                 <span className="text-xs text-gray-500 font-bold uppercase mb-1">
-                  Estimated Total Price
+                  Seats:{" "}
+                  {editForm.seats && editForm.seats.length > 0
+                    ? editForm.seats.join(", ")
+                    : "None"}
+                </span>
+                <button
+                  onClick={() =>
+                    onOpenSeatModal(
+                      booking.flight?._id,
+                      parseInt(editForm.paxCount, 10),
+                      editForm.seats,
+                    )
+                  }
+                  className="px-3 py-2 border border-blue-200 text-blue-600 rounded-xl bg-white hover:bg-blue-50 font-bold text-xs transition-colors w-full"
+                >
+                  Select / Change Seats
+                </button>
+              </div>
+
+              {/* Read-Only Price Preview for Standard User */}
+              <div className="w-1/3 flex flex-col justify-center">
+                <span className="text-xs text-gray-500 font-bold uppercase mb-1">
+                  Estimated Price
                 </span>
                 <span className="text-xl font-extrabold text-blue-600">
                   $
                   {(
-                    (booking.flight?.price || 0) * parseInt(editForm.paxCount, 10)
+                    (booking.flight?.price || 0) *
+                    parseInt(editForm.paxCount, 10)
                   ).toFixed(2)}
                 </span>
               </div>
@@ -204,19 +225,31 @@ const UserBookingCard = ({
           </div>
         ) : (
           <div className="flex flex-col md:flex-row justify-between items-center w-full">
-            {/* 3 Columns: Ref Code removed and placed on the header */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 flex-1">
+            {/* 4 Columns: Assigned Seats Added */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1">
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">
                   Booked On
                 </span>
-                <span className="text-sm">{formatTimestamp(booking.createdAt)}</span>
+                <span className="text-sm">
+                  {formatTimestamp(booking.createdAt)}
+                </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">
                   Passengers
                 </span>
                 <span className="font-bold">{booking.passengers} Pax</span>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400 block font-bold uppercase">
+                  Assigned Seats
+                </span>
+                <span className="font-mono font-bold text-blue-600">
+                  {booking.seats && booking.seats.length > 0
+                    ? booking.seats.join(", ")
+                    : "None"}
+                </span>
               </div>
               <div>
                 <span className="text-xs text-gray-400 block font-bold uppercase">

@@ -26,12 +26,21 @@ class BookingRecordController extends BaseController {
 
   // Create a new flight booking record and update remaining seat counts
   createBooking = async (req, res) => {
-    const { flightId, passengers, targetUserEmail } = req.body;
+    const { flightId, passengers, seats, targetUserEmail } = req.body;
 
     if (!passengers || passengers < 1) {
       return this.sendError(
         res,
         "Passenger count must be at least 1.",
+        null,
+        400,
+      );
+    }
+
+    if (!seats || !Array.isArray(seats) || seats.length !== passengers) {
+      return this.sendError(
+        res,
+        `Must select exactly ${passengers} seat(s).`,
         null,
         400,
       );
@@ -61,6 +70,37 @@ class BookingRecordController extends BaseController {
         return this.sendError(res, "Flight not found", null, 404);
       }
 
+      // Check if each requested seat is valid and available
+      const unavailableSeats = [];
+      const invalidSeats = [];
+      for (const seatNum of seats) {
+        // Seat format validation (e.g. "12A")
+        const match = seatNum.match(/^([1-9]|1\d|2[0-5])([A-F])$/);
+        if (!match) {
+          invalidSeats.push(seatNum);
+        } else if (flight.bookedSeats.includes(seatNum)) {
+          unavailableSeats.push(seatNum);
+        }
+      }
+
+      if (invalidSeats.length > 0) {
+        return this.sendError(
+          res,
+          `Invalid seat selection: ${invalidSeats.join(", ")}.`,
+          null,
+          400,
+        );
+      }
+
+      if (unavailableSeats.length > 0) {
+        return this.sendError(
+          res,
+          `The following seat(s) are already booked: ${unavailableSeats.join(", ")}.`,
+          null,
+          400,
+        );
+      }
+
       // Encapsulated rich model validation check
       if (!flight.hasAvailableSeats(passengers)) {
         return this.sendError(res, "Not enough seats available", null, 400);
@@ -75,11 +115,15 @@ class BookingRecordController extends BaseController {
         .toUpperCase()
         .replace(/[^a-zA-Z0-9]/g, "X");
 
+      // Reserve the seats
+      flight.bookedSeats.push(...seats);
+
       const newBooking = await BookingRecord.create({
         user: bookingOwnerId,
         flight: flightId,
         bookingReference: bookingReference,
         passengers: passengers,
+        seats: seats,
         totalPrice: totalPrice,
         bookingStatus: "active",
       });
@@ -95,12 +139,12 @@ class BookingRecordController extends BaseController {
 
   // Modify an existing booking record using the BookingUpdateFacade
   updateBooking = async (req, res) => {
-    const { newPassengers, adminPriceOverride } = req.body;
+    const { newPassengers, adminPriceOverride, newSeats } = req.body;
 
     try {
       const updatedBooking = await BookingUpdateFacade.updateBooking(
         req.params.id,
-        { newPassengers, adminPriceOverride },
+        { newPassengers, adminPriceOverride, newSeats },
         req.user,
       );
 
@@ -167,6 +211,12 @@ class BookingRecordController extends BaseController {
 
       booking.bookingStatus = "cancelled";
       await booking.save();
+
+      if (booking.seats && booking.seats.length > 0) {
+        flight.bookedSeats = flight.bookedSeats.filter(
+          (seat) => !booking.seats.includes(seat)
+        );
+      }
 
       flight.availableSeats = flight.availableSeats + booking.passengers;
       await flight.save();
