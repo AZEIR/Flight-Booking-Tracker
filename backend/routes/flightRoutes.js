@@ -1,15 +1,11 @@
 const express = require("express");
 const router = express.Router();
-
 const {
-  getFlights,
-  addFlights,
-  updateFlight,
-  cancleFlight,
-} = require("../controllers/flightController");
-const { protect } = require("../middleware/authMiddleware");
+  getAvailableFlights,
+  getFlightById,
+} = require("../controllers/flightRoutesController");
 
-router.route("/").get(protect, getFlights).post(protect, addFlights);
-router.route("/:id").put(protect, updateFlight).delete(protect, cancleFlight);
+router.get("/", getAvailableFlights);
+router.get("/:id", getFlightById);
 
 module.exports = router;

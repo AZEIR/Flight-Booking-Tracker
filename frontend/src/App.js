@@ -8,23 +8,40 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Flights from "./pages/Flights";
+import BookingRecords from "./pages/BookingRecords";
+import FlightCatalog from "./pages/FlightCatalog";
+import SeatSelection from "./pages/SeatSelection";
+import MockPayment from "./pages/MockPayment";
 import { useAuth } from "./context/AuthContext";
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f7f9fc] flex items-center justify-center font-sans text-gray-500 font-bold">
+        Verifying secure session status...
+      </div>
+    );
+  }
   return (
     <Router>
       <Navbar />
       <Routes>
+        <Route path="/" element={<FlightCatalog />} />
+
         <Route
-          path="/"
-          element={user ? <Flights /> : <Navigate to="/login" />}
+          path="/select-seats"
+          element={user ? <SeatSelection /> : <Navigate to="/login" />}
         />
 
         <Route
-          path="/flights"
-          element={user ? <Flights /> : <Navigate to="/login" />}
+          path="/checkout"
+          element={user ? <MockPayment /> : <Navigate to="/login" />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={user ? <BookingRecords /> : <Navigate to="/login" />}
         />
 
         <Route
