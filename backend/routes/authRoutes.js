@@ -3,7 +3,6 @@ const {
   registerUser,
   loginUser,
   logoutUser,
-  updateUserProfile,
   getProfile,
 } = require("../controllers/authController");
 const AuthMiddleware = require("../middleware/authMiddleware");
@@ -16,6 +15,5 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.get("/profile", AuthMiddleware.protect, getProfile);
-router.put("/profile", AuthMiddleware.protect, updateUserProfile);
 
 module.exports = router;

@@ -120,35 +120,6 @@ class AuthController extends BaseController {
       this.sendError(res, error, "Server error");
     }
   };
-
-  // Update the current user's profile name and email address
-
-  updateUserProfile = async (req, res) => {
-    try {
-      const user = await User.findById(req.user.id);
-      if (!user) {
-        return this.sendError(res, "User not found", null, 404);
-      }
-
-      const { name, email } = req.body;
-      user.name = name || user.name;
-      user.email = email || user.email;
-
-      const updatedUser = await user.save();
-      this.sendSuccess(
-        res,
-        {
-          id: updatedUser.id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          token: this.generateToken(updatedUser.id),
-        },
-        "Profile updated successfully",
-      );
-    } catch (error) {
-      this.sendError(res, error);
-    }
-  };
 }
 
 module.exports = new AuthController();

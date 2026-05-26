@@ -1,6 +1,8 @@
 const BookingRecord = require("../models/BookingRecords");
 const AviationData = require("../models/AviationDatas");
 const User = require("../models/User");
+const mongoose = require("mongoose");
+
 const {
   AdminBookingFetcher,
   UserBookingFetcher,
@@ -47,6 +49,11 @@ class BookingRecordController extends BaseController {
     }
 
     try {
+      // Check flightId format
+      if (!mongoose.Types.ObjectId.isValid(flightId)) {
+        return this.sendError(res, "Invalid flight ID format.", null, 400);
+      }
+
       let bookingOwnerId = req.user.id;
 
       // Check if user try to pass targetUserEmail
@@ -80,18 +87,10 @@ class BookingRecordController extends BaseController {
         return this.sendError(res, "Flight not found", null, 404);
       }
 
-      // Check if each requested seat is valid and available
-      const unavailableSeats = [];
-      const invalidSeats = [];
-      for (const seatNum of seats) {
-        // Seat format validation (e.g. "12A")
-        const match = seatNum.match(/^([1-9]|1\d|2[0-5])([A-F])$/);
-        if (!match) {
-          invalidSeats.push(seatNum);
-        } else if (flight.bookedSeats.includes(seatNum)) {
-          unavailableSeats.push(seatNum);
-        }
-      }
+      // Check seats format
+      const invalidSeats = seats.filter(
+        (seatNum) => !seatNum.match(/^([1-9]|1\d|2[0-5])([A-F])$/),
+      );
 
       if (invalidSeats.length > 0) {
         return this.sendError(
@@ -101,6 +100,10 @@ class BookingRecordController extends BaseController {
           400,
         );
       }
+      // Check seats Availability
+      const unavailableSeats = seats.filter((seatNum) =>
+        flight.bookedSeats.includes(seatNum),
+      );
 
       if (unavailableSeats.length > 0) {
         return this.sendError(
@@ -143,7 +146,14 @@ class BookingRecordController extends BaseController {
 
       this.sendSuccess(res, newBooking, "Booking created successfully", 201);
     } catch (error) {
-      this.sendError(res, error, "Server error while creating booking");
+      console.error("Booking Error Detail:", error);
+
+      return this.sendError(
+        res,
+        "An unexpected server error occurred while creating your booking.",
+        null,
+        500,
+      );
     }
   };
 
