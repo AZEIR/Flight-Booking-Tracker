@@ -106,7 +106,7 @@ describe("Flight Booking Record Tests", function () {
   // =============================
 
   describe("POST /api/bookings", async () => {
-    it("Should be successfully create a new booking", async () => {
+    it("Should successfully create a new booking", async () => {
       const createPlayload = {
         flightId: testFlight._id,
         passengers: 1,
@@ -144,7 +144,7 @@ describe("Flight Booking Record Tests", function () {
       expect(myBooking).to.not.be.undefined;
     });
 
-    it("Should NOT retrieve oter user's booking record", async () => {
+    it("Should NOT retrieve other user's booking record", async () => {
       const res = await chai
         .request(app)
         .get("/api/bookings")
