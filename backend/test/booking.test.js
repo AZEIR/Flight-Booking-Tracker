@@ -14,31 +14,33 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 
 describe("Flight Booking Record Tests", function () {
-  this.timeout(10000);
+  this.timeout(20000); // 20 sec
 
   let authToken;
   let testUser;
   let testFlight;
   let createdBookingId;
 
+  let otherUser;
+  let otherBooking;
   // Create temp user before test
   before(async () => {
     // Connect to mongodb
     await connectDB.connect();
     // Just in case user duplicated
-    await User.deleteOne({ email: "iamtestingursystem@testing.com" });
+    await User.deleteOne({ email: "testcase_user@testing.com" });
     await AviationData.deleteMany({ airline: "Mocha Testing Airline" });
     // Create User
     testUser = await User.create({
-      name: "YO I'M TESTING AYY",
-      email: "iamtestingursystem@testing.com",
+      name: "Test Case User",
+      email: "testcase_user@testing.com",
       password: "testingpassword",
       role: "user",
     });
 
     // Login user
     const loginRes = await chai.request(app).post("/api/auth/login").send({
-      email: "iamtestingursystem@testing.com",
+      email: "testcase_user@testing.com",
       password: "testingpassword",
     });
     // save login "token"
@@ -56,6 +58,25 @@ describe("Flight Booking Record Tests", function () {
       bookedSeats: [],
       status: "scheduled",
     });
+
+    await User.deleteOne({ email: "othertestcase_user@testing.com" });
+
+    otherUser = await User.create({
+      name: "Another Test Case User",
+      email: "othertestcase_user@testing.com",
+      password: "testingpassword",
+      role: "user",
+    });
+
+    otherBooking = await BookingRecord.create({
+      user: otherUser._id,
+      flight: testFlight._id,
+      bookingReference: "TXA69X",
+      passengers: 1,
+      seats: ["11A"],
+      totalPrice: 300,
+      bookingStatus: "active",
+    });
   });
 
   // Delete user after test
@@ -69,6 +90,13 @@ describe("Flight Booking Record Tests", function () {
     if (createdBookingId) {
       await BookingRecord.deleteOne({ _id: createdBookingId });
     }
+    if (otherUser) {
+      await User.deleteOne({ _id: otherUser._id });
+    }
+    if (otherBooking) {
+      await BookingRecord.deleteOne({ _id: otherBooking._id });
+    }
+
     // Close connection
     await mongoose.connection.close();
   });
@@ -114,6 +142,19 @@ describe("Flight Booking Record Tests", function () {
 
       const myBooking = res.body.data.find((b) => b._id === createdBookingId);
       expect(myBooking).to.not.be.undefined;
+    });
+
+    it("Should NOT retrieve oter user's booking record", async () => {
+      const res = await chai
+        .request(app)
+        .get("/api/bookings")
+        .set("Authorization", `Bearer ${authToken}`);
+
+      const leakedBooking = res.body.data.find(
+        (b) => b.bookingReference === "TXA69X",
+      );
+
+      expect(leakedBooking).to.be.undefined;
     });
   });
 
