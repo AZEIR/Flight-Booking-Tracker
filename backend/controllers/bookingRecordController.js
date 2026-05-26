@@ -49,6 +49,16 @@ class BookingRecordController extends BaseController {
     try {
       let bookingOwnerId = req.user.id;
 
+      // Check if user try to pass targetUserEmail
+      if (req.user.role !== "admin" && targetUserEmail) {
+        return this.sendError(
+          res,
+          "You do not have permission to specify a target user email.",
+          "Access Denied: Non-admin attempted to use targetUserEmail field.",
+          403, // Forbidden
+        );
+      }
+
       if (req.user.role === "admin" && targetUserEmail) {
         const targetUser = await User.findOne({
           email: targetUserEmail.toLowerCase(),
@@ -62,9 +72,9 @@ class BookingRecordController extends BaseController {
             404,
           );
         }
+
         bookingOwnerId = targetUser._id;
       }
-
       const flight = await AviationData.findById(flightId);
       if (!flight) {
         return this.sendError(res, "Flight not found", null, 404);
@@ -214,7 +224,7 @@ class BookingRecordController extends BaseController {
 
       if (booking.seats && booking.seats.length > 0) {
         flight.bookedSeats = flight.bookedSeats.filter(
-          (seat) => !booking.seats.includes(seat)
+          (seat) => !booking.seats.includes(seat),
         );
       }
 
