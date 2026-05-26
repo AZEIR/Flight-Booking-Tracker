@@ -1,10 +1,10 @@
 const BookingRecord = require("../models/BookingRecords");
 const AviationData = require("../models/AviationDatas");
 
-class BookingError extends Error {
+class BookingUpdateError extends Error {
   constructor(message, statusCode = 500) {
     super(message);
-    this.name = "BookingError";
+    this.name = "BookingUpdateError";
     this.statusCode = statusCode;
   }
 }
@@ -17,29 +17,32 @@ class BookingUpdateFacade {
     currentUser,
   ) {
     if (newPassengers !== undefined && newPassengers < 1) {
-      throw new BookingError("Passenger count must be at least 1.", 400);
+      throw new BookingUpdateError("Passenger count must be at least 1.", 400);
     }
 
     const booking = await BookingRecord.findById(bookingId);
 
     if (!booking) {
-      throw new BookingError("Booking not found", 404);
+      throw new BookingUpdateError("Booking not found", 404);
     }
 
     // Encapsulated model check for booking ownership/admin privileges
     if (!booking.canBeModifiedBy(currentUser)) {
-      throw new BookingError("Not authorised to modify this booking.", 403);
+      throw new BookingUpdateError(
+        "Not authorised to modify this booking.",
+        403,
+      );
     }
 
     if (booking.bookingStatus === "cancelled") {
-      throw new BookingError("Cannot update a cancelled booking", 400);
+      throw new BookingUpdateError("Cannot update a cancelled booking", 400);
     }
 
     const flight = await AviationData.findById(booking.flight);
 
     // Encapsulated model check for the restricted 24-hour departure lockout window
     if (flight.isLockedForModifications() && currentUser.role !== "admin") {
-      throw new BookingError(
+      throw new BookingUpdateError(
         "Modifications are locked within 24 hours of departure.",
         400,
       );
@@ -53,7 +56,7 @@ class BookingUpdateFacade {
       newPassengers !== booking.passengers &&
       !newSeats
     ) {
-      throw new BookingError(
+      throw new BookingUpdateError(
         "Must select new seats matching the ticket count.",
         400,
       );
@@ -63,7 +66,7 @@ class BookingUpdateFacade {
 
     if (newSeats !== undefined) {
       if (!Array.isArray(newSeats) || newSeats.length !== targetPassengers) {
-        throw new BookingError(
+        throw new BookingUpdateError(
           `Must select exactly ${targetPassengers} seat(s).`,
           400,
         );
@@ -71,7 +74,7 @@ class BookingUpdateFacade {
 
       // Temporarily release the old seats
       const tempBookedSeats = flight.bookedSeats.filter(
-        (seat) => !oldSeats.includes(seat)
+        (seat) => !oldSeats.includes(seat),
       );
 
       // Check if each new seat is valid and available
@@ -88,12 +91,12 @@ class BookingUpdateFacade {
 
       if (invalidSeats.length > 0 || unavailableSeats.length > 0) {
         if (invalidSeats.length > 0) {
-          throw new BookingError(
+          throw new BookingUpdateError(
             `Invalid seat selection: ${invalidSeats.join(", ")}.`,
             400,
           );
         } else {
-          throw new BookingError(
+          throw new BookingUpdateError(
             `The following seat(s) are already booked: ${unavailableSeats.join(
               ", ",
             )}.`,
@@ -115,7 +118,7 @@ class BookingUpdateFacade {
         passengerDifference > 0 &&
         !flight.hasAvailableSeats(passengerDifference)
       ) {
-        throw new BookingError(
+        throw new BookingUpdateError(
           "Not enough extra seats available on this flight",
           400,
         );
@@ -135,7 +138,7 @@ class BookingUpdateFacade {
 
     if (adminPriceOverride !== undefined) {
       if (currentUser.role !== "admin") {
-        throw new BookingError(
+        throw new BookingUpdateError(
           "Only administrators can override booking pricing.",
           403,
         );
@@ -150,5 +153,5 @@ class BookingUpdateFacade {
 
 module.exports = {
   BookingUpdateFacade,
-  BookingError,
+  BookingUpdateError,
 };
