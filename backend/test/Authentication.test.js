@@ -433,24 +433,12 @@ describe("Authentication and Flight API Tests", function () {
     });
 
     it("should return empty array when no flights exist", async () => {
-      // Temporarily delete all flights
-      await AviationData.deleteMany({});
+      // Stub AviationData.find to return empty array instead of deleting real database records
+      const findStub = sinon.stub(AviationData, "find").resolves([]);
 
       const res = await chai.request(app).get("/api/flights");
 
-      // Restore flights
-      testFlight = await AviationData.create({
-        airline: "Auth Testing Airline",
-        flightNumber: "AT-100",
-        departureAirport: "SYD",
-        arrivalAirport: "MEL",
-        departureTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
-        arrivalTime: new Date(Date.now() + 54 * 60 * 60 * 1000),
-        price: 150,
-        availableSeats: 100,
-        bookedSeats: [],
-        status: "scheduled",
-      });
+      findStub.restore();
 
       expect(res).to.have.status(200);
       expect(res.body.data).to.be.an("array").that.is.empty;
