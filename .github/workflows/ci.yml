@@ -32,9 +32,8 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
+          echo "REACT_APP_DOMAIN_NAME=http://${{ secrets.REACT_APP_DOMAIN_NAME }}" > .env
           npm run build
-        env:
-          REACT_APP_DOMAIN_NAME: http://${{ secrets[matrix.domain_secret_name] }}:5001
 
       - name: Install Backend & Setup Environment
         working-directory: ./backend
