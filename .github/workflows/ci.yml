@@ -12,10 +12,10 @@ jobs:
       matrix:
         include:
           - runner: prod-1
-          domain_secret_name: DOMAIN_NAME_PROD_1
+            domain_secret_name: DOMAIN_NAME_PROD_1
           - runner: prod-2
-          domain_secret_name: DOMAIN_NAME_PROD_2
- 
+            domain_secret_name: DOMAIN_NAME_PROD_2
+
     name: Build and Deploy (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
 
