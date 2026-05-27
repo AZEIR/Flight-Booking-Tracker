@@ -32,7 +32,7 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          echo "REACT_APP_DOMAIN_NAME=http://${{ secrets.REACT_APP_DOMAIN_NAME }}" > .env
+          echo "REACT_APP_DOMAIN_NAME=${{ secrets.REACT_APP_DOMAIN_NAME }}" > .env
           npm run build
 
       - name: Install Backend & Setup Environment
