@@ -419,20 +419,7 @@ const FlightCatalog = () => {
                       <span className="text-3xl font-black text-slate-900 tracking-tighter mt-1">
                         {flight.flightNumber}
                       </span>
-                      {/* Status badge */}
-                      {flight.status && flight.status !== "scheduled" && (
-                        <span
-                          className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mt-1 ${
-                            flight.status === "delayed"
-                              ? "bg-amber-100 text-amber-700"
-                              : flight.status === "cancelled"
-                                ? "bg-red-100 text-red-600"
-                                : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {flight.status}
-                        </span>
-                      )}
+
                     </div>
 
                     {/* Departure Time */}
