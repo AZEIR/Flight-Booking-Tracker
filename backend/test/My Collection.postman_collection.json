@@ -1,0 +1,3436 @@
+{
+  "info": {
+    "_postman_id": "8a8b7645-ad40-4e87-a1af-fd7f06a29f9a",
+    "name": "My Collection",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55188481",
+    "_collection_link": "https://go.postman.co/collection/55188481-8a8b7645-ad40-4e87-a1af-fd7f06a29f9a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Register with no parameter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response status code is 500\", function () {\r",
+              "    pm.response.to.have.status(500);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Return valid error message\", function() {\r",
+              "    pm.expect(response.message).to.include(\"User validation failed: name: Path `name` is required., email: Path `email` is required., password: Path `password` is required.\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"No stack trace in response\", function () {\r",
+              "    const body = pm.response.text();\r",
+              "    pm.expect(body).to.not.match(/at Object\\.|stacktrace/i);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register with existing user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error message is 'User already exists'\", function () {\r",
+              "    pm.expect(response.message).to.eql('User already exists');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"azeir\",\r\n    \"email\": \"azeir@azeir.com\",\r\n    \"password\": \"azeir\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register with new user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();",
+              "",
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response return a JSON object\", function (){",
+              "    pm.response.to.be.withBody;",
+              "    pm.response.to.be.json;",
+              "});",
+              "",
+              "pm.test(\"JSON object contain id, name and email\", function(){",
+              "    const responseJson = pm.response.json();",
+              "    const requestBody = JSON.parse(pm.request.body.raw);",
+              "    pm.expect(responseJson.data).to.have.property('id');",
+              "    pm.expect(responseJson.data.name).to.eql(requestBody.name);",
+              "    pm.expect(responseJson.data.email).to.eql(requestBody.email);",
+              "    pm.expect(responseJson.data.role).to.eql('user');",
+              "});",
+              "",
+              "pm.test(\"'Set-Cookie' header in response\", function(){",
+              "    pm.response.to.have.header(\"Set-Cookie\");",
+              "});",
+              "",
+              "pm.test(\"token cookie is set\", function(){",
+              "    const tokenCookie = pm.cookies.has(\"token\");",
+              "    pm.expect(tokenCookie).to.be.true;",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"{{$randomUserName}}\",\r\n    \"email\": \"{{$randomExampleEmail}}\",\r\n    \"password\": \"password\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login with no parameter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Return valid error message\", function() {\r",
+              "    pm.expect(response.message).to.include(\"Email and password are required\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"No stack trace in response\", function () {\r",
+              "    const body = pm.response.text();\r",
+              "    pm.expect(body).to.not.match(/at Object\\.|stacktrace/i);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login with non-existing user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 401\", function () {\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error message is 'Invalid email or password'\", function () {\r",
+              "    pm.expect(response.message).to.eql('Invalid email or password');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"idontexist@error.com\",\r\n    \"password\": \"password\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login with wrong email",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 401\", function () {\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error message is 'Invalid email or password'\", function () {\r",
+              "    pm.expect(response.message).to.eql('Invalid email or password');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"wrongemail@error.com\",\r\n    \"password\": \"azeir\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login with wrong password",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 401\", function () {\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error message is 'Invalid email or password'\", function () {\r",
+              "    pm.expect(response.message).to.eql('Invalid email or password');\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"azeir@azeir.com\",\r\n    \"password\": \"wrongpassword\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Profile without authentication",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 401\", function(){\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not authorized, no token provided\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableCookies": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5001/api/auth/profile",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login with valid user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "pm.environment.set(\"token\", pm.cookies.get('token'));\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"JSON object contain id, name and email and role\", function(){\r",
+              "    const responseJson = pm.response.json();\r",
+              "    const requestBody = JSON.parse(pm.request.body.raw);\r",
+              "    pm.expect(responseJson.data).to.have.property('id');\r",
+              "    pm.expect(responseJson.data).to.have.property('name');\r",
+              "    pm.expect(responseJson.data.email).to.eql(requestBody.email);\r",
+              "    pm.expect(responseJson.data).to.have.property('role');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"'Set-Cookie' header in response\", function(){\r",
+              "    pm.response.to.have.header(\"Set-Cookie\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"token cookie is set\", function(){\r",
+              "    const tokenCookieExist = pm.cookies.has(\"token\");\r",
+              "    pm.expect(tokenCookieExist).to.be.true;\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"azeir@azeir.com\",\r\n    \"password\": \"azeir\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Profile with valid user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"JSON object contain role, name and email\", function(){\r",
+              "    const responseJson = pm.response.json();\r",
+              "    pm.expect(responseJson.data).to.have.property('role');\r",
+              "    pm.expect(responseJson.data).to.have.property('name');\r",
+              "    pm.expect(responseJson.data).to.have.property('email');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body respond suscess\", function(){\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Profile retrieved successfully\");\r",
+              "    });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/auth/profile",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get booking without authentication",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 401\", function(){\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not authorized, no token provided\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableCookies": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get booking for user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response contains success field\", function () {\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Request processed successfully.\");\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response contains data field\", function () {\r",
+              "    pm.expect(response.data).to.be.an('array');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking without authentication",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 401\", function(){\r",
+              "    pm.response.to.have.status(401);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not authorized, no token provided\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableCookies": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with no parameter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Passenger count must be at least 1.\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with no passengers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Passenger count must be at least 1.\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a1436fb67e1087de41c16fe\",\r\n    \"passengers\": \"0\",\r\n    \"seats\": \"1\",\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with null passengers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Passenger count must be at least 1.\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a1436fb67e1087de41c16fe\",\r\n    \"passengers\": null,\r\n    \"seats\": \"1\",\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with null seat",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select exactly 1 seat(s).\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a1436fb67e1087de41c16fe\",\r\n    \"passengers\": 1,\r\n    \"seats\": null,\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with non-array of seats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select exactly 1 seat(s).\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a1436fb67e1087de41c16fe\",\r\n    \"passengers\": 1,\r\n    \"seats\": \"1\",\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with unmatch seats with passenger count",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select exactly 3 seat(s).\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a1436fb67e1087de41c16fe\",\r\n    \"passengers\": 3,\r\n    \"seats\": \"['1F','1E']\",\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with TargetUserEmail set as non-admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select exactly 3 seat(s).\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a1436fb67e1087de41c16fe\",\r\n    \"passengers\": \"3\",\r\n    \"seats\": \"[]\",\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with invalid flightId",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 404\", function(){\r",
+              "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Flight not found\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6a139c31fb4cbeb4c68c636a\",\r\n    \"passengers\": 3,\r\n    \"seats\": [\"1F\",\"1E\",\"1D\"],\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with null flightId",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Invalid flight ID format.\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": null,\r\n    \"passengers\": 3,\r\n    \"seats\": [\"1F\",\"1E\",\"1D\"],\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with invalid seat",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Invalid seat selection: 26F.\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6654a1b0c0d0e0f000000002\",\r\n    \"passengers\": 3,\r\n    \"seats\": [\"26F\",\"1E\",\"1D\"],\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with unavailableSeats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Status cesponse body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"The following seat(s) are already booked: 1F, 1E, 1D.\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6654a1b0c0d0e0f000000002\",\r\n    \"passengers\": 3,\r\n    \"seats\": [\"1F\",\"1E\",\"1D\"],\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with not enough seats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function(){\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not enough seats available\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6654a1b0c0d0e0f000000002\",\r\n    \"passengers\": 3,\r\n    \"seats\": [\"24C\",\"24D\",\"24E\"],\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking with valid user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();",
+              "",
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "    });",
+              "",
+              "pm.test(\"Response return a JSON object\", function (){",
+              "    pm.response.to.be.withBody;",
+              "    pm.response.to.be.json;",
+              "});",
+              "",
+              "pm.test(\"Response should have a success field with value true\", function () {",
+              "    pm.expect(response.success).to.be.true;",
+              "    pm.expect(response.message).to.equal(\"Booking created successfully\");",
+              "    });",
+              "",
+              "pm.test(\"Response should have a data field with booking details\", function () {",
+              "    pm.expect(response.data).to.have.property(\"user\");",
+              "    pm.expect(response.data.flight).to.equal(\"6654a1b0c0d0e0f000000002\");",
+              "    pm.expect(response.data).to.have.property(\"bookingReference\");",
+              "    pm.expect(response.data.passengers).to.equal(1);",
+              "    pm.expect(response.data.seats).to.deep.equal([\"25A\"]);",
+              "    pm.expect(response.data).to.have.property(\"totalPrice\");",
+              "    pm.expect(response.data.bookingStatus).to.equal(\"active\");",
+              "    pm.expect(response.data).to.have.property(\"_id\");",
+              "    pm.expect(response.data).to.have.property(\"createdAt\");",
+              "    pm.expect(response.data).to.have.property(\"updatedAt\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6654a1b0c0d0e0f000000002\",\r\n    \"passengers\": 1,\r\n    \"seats\": [\"25A\"],\r\n    \"targetUserEmail\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) 0 passengers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Passenger count must be at least 1.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 0,\r\n    \"newSeats\": [\"6D\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) null passengers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Passenger count must be at least 1.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": null,\r\n    \"newSeats\": [\"6D\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) not owned by user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 403\", function () {\r",
+              "    pm.response.to.have.status(403);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not authorised to modify this booking.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 1,\r\n    \"newSeats\": [\"6D\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16a9ab40f320b302fe20a1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) null newSeats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select new seats matching the ticket count.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 2,\r\n    \"newSeats\": null\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) newSeats not array",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select exactly 2 seat(s).\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 2,\r\n    \"newSeats\": \"6D,6E\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) newSeats not match PassengersCount",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Must select exactly 2 seat(s).\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 2,\r\n    \"newSeats\": [\"6D\",\"6E\",\"6F\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) newSeats contain invalidSeats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Invalid seat selection: EE.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 2,\r\n    \"newSeats\": [\"6D\",\"EE\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) newSeats contain unavailableSeats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"The following seat(s) are already booked: 6D, 1A.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 2,\r\n    \"newSeats\": [\"6D\",\"1A\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) newSeats larger than availableSeats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not enough extra seats available on this flight\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 3,\r\n    \"newSeats\": [\"24E\",\"24F\",\"25A\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override) invalid bookingID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Booking not found\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 1,\r\n    \"newSeats\": [\"6D\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a150072c77c6eb2ea36dd94"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (with price override)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 403\", function () {\r",
+              "    pm.response.to.have.status(403);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Only administrators can override booking pricing.\")\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 1,\r\n    \"adminPriceOverride\": 1,\r\n    \"newSeats\": [\"24E\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835da"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update booking with user (no price override)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response should have a success field with value true\", function () {\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Booking updated successfully\");\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response should have a data field with booking details\", function () {\r",
+              "    pm.expect(response.data.booking).to.have.property(\"user\");\r",
+              "    pm.expect(response.data.booking.flight).to.equal(\"6654a1b0c0d0e0f000000002\");\r",
+              "    pm.expect(response.data.booking).to.have.property(\"bookingReference\");\r",
+              "    pm.expect(response.data.booking.passengers).to.equal(1);\r",
+              "    pm.expect(response.data.booking.seats).to.deep.equal([\"24C\"]);\r",
+              "    pm.expect(response.data.booking).to.have.property(\"totalPrice\");\r",
+              "    pm.expect(response.data.booking.bookingStatus).to.equal(\"active\");\r",
+              "    pm.expect(response.data.booking).to.have.property(\"_id\");\r",
+              "    pm.expect(response.data.booking).to.have.property(\"createdAt\");\r",
+              "    pm.expect(response.data.booking).to.have.property(\"updatedAt\");\r",
+              "    pm.expect(response.data.booking).to.have.property(\"__v\");\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"newPassengers\": 1,\r\n    \"newSeats\": [\"24C\"]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e8a705f58bdae698363c"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking with user",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const response = await pm.execution.runRequest(\"55188481-0e202f7a-1ed2-464f-9fa1-50ef98a5e858\")",
+              "",
+              "const body = response.json();",
+              "",
+              "if (!body.data || !body.data._id) {",
+              "    continue;",
+              "}",
+              "",
+              "const id = body.data._id;",
+              "pm.variables.set('id', id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response return a JSON object\", function () {",
+              "    pm.response.to.be.withBody;",
+              "    pm.response.to.be.json;",
+              "});",
+              "",
+              "pm.test(\"Response return true success\", function() {",
+              "    pm.expect(response.success).to.be.true;",
+              "    pm.expect(response.message).to.equal(\"Booking cancelled successfully\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking with wrong bookingID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Booking not found\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e56905f58bdae69835ad"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking with bookingID belong to different user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 403\", function () {\r",
+              "    pm.response.to.have.status(403);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Not authorised to modify this booking.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16a9ab40f320b302fe20a1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking with bookingID that is already cancelled",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Booking is already cancelled\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e97c05f58bdae6983652"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking with a wrong flightID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Associated flight data not found.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16e46e221df93432d22a6b"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking with bookingID that is departed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Cannot cancel a flight that has already departed.\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings/:id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings",
+            ":id",
+            "cancel"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6a16ee12ab844e69ac6fbb24"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"'Set-Cookie' header in response\", function(){\r",
+              "    pm.response.to.have.header(\"Set-Cookie\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Existing token is removed\", function(){\r",
+              "    const tokenCookieExist = pm.cookies.has(\"token\");\r",
+              "    pm.expect(tokenCookieExist).to.be.false;\r",
+              "    pm.expect(response.message).to.eql(\"Logged out successfully\");\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5001/api/auth/logout",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get available flights",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Return success is true\", function () {\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Available flights retrieved successfully\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Return data is an array\", function () {\r",
+              "    pm.expect(response.data).to.be.an('array');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/flights",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "flights"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get flight by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Return success is true\", function () {\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Flight retrieved successfully\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Flight data is populated\", function(){\r",
+              "    pm.expect(response.data).to.have.property(\"_id\");\r",
+              "    pm.expect(response.data).to.have.property(\"airline\");\r",
+              "    pm.expect(response.data).to.have.property(\"flightNumber\");\r",
+              "    pm.expect(response.data).to.have.property(\"departureAirport\");\r",
+              "    pm.expect(response.data).to.have.property(\"arrivalAirport\");\r",
+              "    pm.expect(response.data).to.have.property(\"departureTime\");\r",
+              "    pm.expect(response.data).to.have.property(\"arrivalTime\");\r",
+              "    pm.expect(response.data).to.have.property(\"price\");\r",
+              "    pm.expect(response.data).to.have.property(\"availableSeats\");\r",
+              "    pm.expect(response.data).to.have.property(\"bookedSeats\");\r",
+              "    pm.expect(response.data).to.have.property(\"status\");\r",
+              "    pm.expect(response.data).to.have.property(\"__v\");\r",
+              "    pm.expect(response.data).to.have.property(\"updatedAt\");\r",
+              "    });\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/flights/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "flights",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6654a1b0c0d0e0f000000002"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get flight by id with wrong flightID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response= pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 404\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return false success\", function() {\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"Flight not found\")\r",
+              "})\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/flights/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "flights",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "6654a1b0c0d0e0f002020002"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login for admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "pm.environment.set(\"token\", pm.cookies.get('token'));\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"JSON object contain id, name and email and role\", function(){\r",
+              "    const responseJson = pm.response.json();\r",
+              "    const requestBody = JSON.parse(pm.request.body.raw);\r",
+              "    pm.expect(responseJson.data).to.have.property('id');\r",
+              "    pm.expect(responseJson.data).to.have.property('name');\r",
+              "    pm.expect(responseJson.data.email).to.eql(requestBody.email);\r",
+              "    pm.expect(responseJson.data).to.have.property('role');\r",
+              "});\r",
+              "\r",
+              "pm.test(\"'Set-Cookie' header in response\", function(){\r",
+              "    pm.response.to.have.header(\"Set-Cookie\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"token cookie is set\", function(){\r",
+              "    const tokenCookieExist = pm.cookies.has(\"token\");\r",
+              "    pm.expect(tokenCookieExist).to.be.true;\r",
+              "})\r",
+              "\r",
+              "pm.test(\"Response should return admin role\", function (){\r",
+              "    pm.expect(response.data.role).to.eql(\"admin\");\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"admin@admin.com\",\r\n    \"password\": \"admin\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get booking for admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response contains success field\", function () {\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Request processed successfully.\");\r",
+              "    });\r",
+              "\r",
+              "pm.test(\"Response contains data field\", function () {\r",
+              "    pm.expect(response.data).to.be.an('array');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking invalid targetUserEmail with admin account",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 404\", function(){\r",
+              "    pm.response.to.have.status(404);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.false;\r",
+              "    pm.expect(response.message).to.equal(\"No account registered with email address \\\"azzir@azzir.com\\\".\");\r",
+              "})\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6654a1b0c0d0e0f000000009\",\r\n    \"passengers\": 1,\r\n    \"seats\": [\"1F\"],\r\n    \"targetUserEmail\": \"azzir@azzir.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking targetUserEmail with admin account Copy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 201\", function(){\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response return a JSON object\", function (){\r",
+              "    pm.response.to.be.withBody;\r",
+              "    pm.response.to.be.json;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response body return false\", function(){\r",
+              "    pm.expect(response.success).to.be.true;\r",
+              "    pm.expect(response.message).to.equal(\"Booking created successfully\");\r",
+              "})\r",
+              "\r",
+              "pm.test(\"Response body contains booking data\", function(){\r",
+              "    pm.expect(response.data).to.have.property(\"_id\");\r",
+              "    pm.expect(response.data).to.have.property(\"user\");\r",
+              "    pm.expect(response.data).to.equal(\"6654a1b0c0d0e0f000000009\");\r",
+              "    pm.expect(response.data).to.have.property(\"bookingReference\");\r",
+              "    pm.expect(response.data.passengers).to.equal(1);\r",
+              "    pm.expect(response.data.seats).to.include(\"1F\");\r",
+              "    pm.expect(response.data).to.have.property(\"totalPrice\");\r",
+              "    pm.expect(response.data.bookingStatus).to.equal(\"active\");\r",
+              "    pm.expect(response.data.user).to.equal(\"6a05118812523c411090b1a5\");\r",
+              "    pm.expect(response.data).to.have.property(\"createdAt\");\r",
+              "    pm.expect(response.data).to.have.property(\"updatedAt\");\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"flightId\": \"6654a1b0c0d0e0f000000009\",\r\n    \"passengers\": 1,\r\n    \"seats\": [\"1F\"],\r\n    \"targetUserEmail\": \"azeir@azeir.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:5001/api/bookings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5001",
+          "path": [
+            "api",
+            "bookings"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
